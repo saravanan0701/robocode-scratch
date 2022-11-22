@@ -13,9 +13,23 @@ const autoprefixer = require("autoprefixer");
 const postcssconsts = require("postcss-simple-vars");
 const postcssImport = require("postcss-import");
 
-const configParsed = dotenv.config({
-	path: path.resolve(__dirname, ".env"),
-}).parsed;
+let configParsed = null;
+
+try {
+	configParsed = dotenv.config({
+		path: path.resolve(__dirname, ".env"),
+	}).parsed;
+} catch (error) {
+	configParsed = null;
+}
+
+if (!configParsed) {
+	configParsed = {
+		NODE_ENV: "development",
+		HOST: "localhost",
+		PORT: 3000,
+	};
+}
 
 const CONFIG_PREFIX = "REACT_APP_";
 
