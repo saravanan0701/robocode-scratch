@@ -10,7 +10,7 @@ const ScratchGUI = React.lazy(() => import("./components/scratch-gui"));
 
 import store from ".//third-party/scratch-gui/lib/new/store";
 
-const appTarget = document.createElement("div");
+const appTarget = document.getElementById("root");
 appTarget.className = styles.app;
 
 document.body.appendChild(appTarget);

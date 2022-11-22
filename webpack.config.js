@@ -25,6 +25,7 @@ const base = {
     },
     output: {
         library: "GUI",
+        publicPath: '/',
         filename: "[name].js",
         chunkFilename: "chunks/[name].js",
     },

@@ -12,7 +12,7 @@ const backpackHostMatches = window.location.href.match(/[?&]backpack_host=([^&]*
 const backpackHost = backpackHostMatches ? backpackHostMatches[1] : null;
 
 const onClickLogo = () => {
-    window.location = 'https://scratch.mit.edu';
+    window.location = '/';
 };
 
 export default function ScratchGUI() {
