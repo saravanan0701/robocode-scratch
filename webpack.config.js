@@ -55,31 +55,22 @@ const base = {
 		rules: [
 			{
 				test: /\.jsx?$/,
-				loader: "babel-loader",
+				loader: "swc-loader",
 				include: [
 					path.resolve(__dirname, "src"),
 					/node_modules[\\/]scratch-[^\\/]+[\\/]src/,
 					/node_modules[\\/]pify/,
 					/node_modules[\\/]@vernier[\\/]godirect/,
 				],
-				options: {
-					// Explicitly disable babelrc so we don't catch constious config
-					// in much lower dependencies.
-					babelrc: false,
-					plugins: [
-						"@babel/plugin-syntax-dynamic-import",
-						"@babel/plugin-transform-async-to-generator",
-						"@babel/plugin-proposal-object-rest-spread",
-						"@babel/plugin-transform-runtime",
-					],
-					presets: ["@babel/preset-env", "@babel/preset-react"],
-				},
+				exclude: [
+					path.resolve(__dirname, "src", "third-party"),
+				]
 			},
 			{
 				test: /\.jsx?$/,
 				loader: "babel-loader",
 				include: [
-					path.resolve(__dirname, "src"),
+					path.resolve(__dirname, "src", "third-party"),
 					/node_modules[\\/]scratch-[^\\/]+[\\/]src/,
 					/node_modules[\\/]pify/,
 					/node_modules[\\/]@vernier[\\/]godirect/,
