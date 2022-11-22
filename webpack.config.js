@@ -6,7 +6,7 @@ const dotenv = require("dotenv");
 // Plugins
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
-const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
+const TerserPlugin = require("terser-webpack-plugin");
 
 // PostCss
 const autoprefixer = require("autoprefixer");
@@ -62,9 +62,7 @@ const base = {
 					/node_modules[\\/]pify/,
 					/node_modules[\\/]@vernier[\\/]godirect/,
 				],
-				exclude: [
-					path.resolve(__dirname, "src", "third-party"),
-				]
+				exclude: [path.resolve(__dirname, "src", "third-party")],
 			},
 			{
 				test: /\.jsx?$/,
@@ -119,8 +117,9 @@ const base = {
 		],
 	},
 	optimization: {
+		minimize: true,
 		minimizer: [
-			new UglifyJsPlugin({
+			new TerserPlugin({
 				include: /\.min\.js$/,
 			}),
 		],
@@ -160,7 +159,7 @@ module.exports = [
 				name: "lib.min",
 			},
 			runtimeChunk: {
-				name: "lib.min",
+				name: "lib.runtime.min",
 			},
 		},
 		plugins: base.plugins.concat([
