@@ -29,7 +29,6 @@ import workspaceMetricsReducer, {workspaceMetricsInitialState} from './workspace
 import throttle from 'redux-throttle';
 
 import decks from '../lib/libraries/decks/index.jsx';
-import {mainReducer, mainReducerInitialState} from './new/main-reducer';
 
 const guiMiddleware = compose(applyMiddleware(throttle(300, {leading: true, trailing: true})));
 
@@ -61,7 +60,6 @@ const guiInitialState = {
     vm: vmInitialState,
     vmStatus: vmStatusInitialState,
     workspaceMetrics: workspaceMetricsInitialState,
-    main: mainReducerInitialState
 };
 
 const initPlayer = function (currentState) {
@@ -161,7 +159,6 @@ const guiReducer = combineReducers({
     vm: vmReducer,
     vmStatus: vmStatusReducer,
     workspaceMetrics: workspaceMetricsReducer,
-    main: mainReducer
 });
 
 export {

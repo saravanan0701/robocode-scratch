@@ -3,6 +3,7 @@ import locales from "scratch-l10n";
 import { ScratchPaintReducer } from "scratch-paint";
 
 import guiReducer, { guiInitialState, guiMiddleware } from "../../reducers/gui";
+import { mainReducer, mainReducerInitialState } from "../../reducers/new/main-reducer";
 
 import localesReducer, { initLocale, localesInitialState } from "../../reducers/locales";
 import { detectLocale } from "../detect-locale";
@@ -20,12 +21,14 @@ const initializedGui = guiInitialState;
 
 const reducers = {
 	locales: localesReducer,
+	main: mainReducer,
 	scratchGui: guiReducer,
 	scratchPaint: ScratchPaintReducer,
 };
 
 const initialState = {
 	locales: initializedLocales,
+	main: mainReducerInitialState,
 	scratchGui: initializedGui,
 };
 
