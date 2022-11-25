@@ -54,7 +54,10 @@ const base = {
 		contentBase: path.resolve(__dirname, "build"),
 		host: configParsed.HOST,
 		port: configParsed.PORT || 3000,
-		historyApiFallback: true,
+		historyApiFallback: {
+			index: "/",
+			disableDotRule: true,
+		},
 	},
 	output: {
 		library: "GUI",
@@ -130,19 +133,21 @@ const base = {
 			},
 		],
 	},
-	optimization: {
-		minimize: true,
-		minimizer: [
-			new TerserPlugin({
-				include: /\.min\.js$/,
-			}),
-		],
-	},
+	optimization: {},
 	plugins: [],
 };
 
 if (!process.env.CI) {
 	base.plugins.push(new webpack.ProgressPlugin());
+}
+
+if (filteredConfig.NODE_ENV === 'production') {
+	base.optimization.minimize = true
+	base.optimization.minimizer = [
+		new TerserPlugin({
+			include: /\.min\.js$/,
+		})
+	]
 }
 
 module.exports = [

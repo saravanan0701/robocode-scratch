@@ -4,7 +4,7 @@ export const BASE_API = "/api/v1/";
 export const API_URL = `${HOST}${BASE_API}`;
 
 const apiUrls = {
-    LOGIN: `${API_URL}auth/login`,
+    CONSUME_ACTIVITY: `${API_URL}redirectToken/consume`,
 }
 
 export default apiUrls;
