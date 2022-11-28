@@ -9,7 +9,11 @@ export const Types = keyMirror({
 
 export const mainReducerInitialState = {
     authData: null,
-    activityData: null
+    activityData: {
+        resources: {
+            pdf: "https://zinedumain.s3.us-east-2.amazonaws.com/student-syllabus/1666176708594_myRANK2023_NEET.pdf"
+        }
+    }
 };
 
 export const mainReducer = function (state = mainReducerInitialState, action) {

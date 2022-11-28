@@ -1,7 +1,7 @@
 import classNames from 'classnames';
 import omit from 'lodash.omit';
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, { useState } from 'react';
 import {defineMessages, FormattedMessage, injectIntl, intlShape} from 'react-intl';
 import {connect} from 'react-redux';
 import MediaQuery from 'react-responsive';
@@ -39,6 +39,8 @@ import addExtensionIcon from './icon--extensions.svg';
 import codeIcon from './icon--code.svg';
 import costumesIcon from './icon--costumes.svg';
 import soundsIcon from './icon--sounds.svg';
+import { useSelector } from 'react-redux';
+import PdfViewer from '../../../../common/pdf-viewer.js';
 
 const messages = defineMessages({
     addExtension: {
@@ -121,6 +123,14 @@ const GUIComponent = props => {
         vm,
         ...componentProps
     } = omit(props, 'dispatch');
+    const activityData = useSelector((state) => state.main.activityData)
+    const [numPages, setNumPages] = useState(null);
+    const [pageNumber, setPageNumber] = useState(1);
+	const [isModalOpen, setIsModalOpen] = useState(false);
+  
+    function onDocumentLoadSuccess({ numPages }) {
+      setNumPages(numPages);
+    }
     if (children) {
         return <Box {...componentProps}>{children}</Box>;
     }
@@ -309,6 +319,29 @@ const GUIComponent = props => {
                                             stageSize={stageSize}
                                             vm={vm}
                                         />
+                                    </Box>
+                                    <div className={styles.modal} style={{ display: isModalOpen ? "flex" : "none" }}>
+					                    <div className={styles.topBar}>
+						                    <div className={styles.closeButton} onClick={() => setIsModalOpen(false)} />
+					                    </div>
+                                        {isModalOpen && (
+                                           <div>
+                                           <PdfViewer url={encodeURI(activityData.resources.pdf)} />
+                                           </div>
+                                        )}
+	                    			</div>
+                                    <Box className={styles.viewerButtonContainer}>
+                                        <button
+                                                className={styles.extensionButton}
+                                                title={intl.formatMessage(messages.addExtension)}
+                                                onClick={() => setIsModalOpen(true)}
+                                            >
+                                                <img
+                                                    className={styles.extensionButtonIcon}
+                                                    draggable={false}
+                                                    src={addExtensionIcon}
+                                                />
+                                        </button>
                                     </Box>
                                     <Box className={styles.extensionButtonContainer}>
                                         <button

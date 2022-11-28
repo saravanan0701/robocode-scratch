@@ -237,14 +237,27 @@
     right: 0;
     z-index: $z-index-extension-button;
     background: $motion-primary;
+    border: 1px solid $motion-primary;
+    box-sizing: content-box; /* To match scratch-block vertical toolbox borders */
+    border-top: 1px solid $ui-white
+}
 
+.viewer-button-container {
+    width: 3.75rem;
+    height: 3.25rem;
+    position: absolute;
+    bottom: 3.35rem;
+    left: 0;
+    right: 0;
+    z-index: $z-index-extension-button;
+    background: $motion-primary;
     border: 1px solid $motion-primary;
     box-sizing: content-box; /* To match scratch-block vertical toolbox borders */
 }
 
 $fade-out-distance: 15px;
 
-.extension-button-container:before {
+.viewer-button-container:before {
     content: "";
     position: absolute;
     top: calc(calc(-1 * $fade-out-distance) - 1px);
@@ -316,4 +329,41 @@ $fade-out-distance: 15px;
 */
 :global(.ReactModal__Body--open) {
     overflow: hidden;
+}
+
+.modal {
+	position: fixed;
+	inset: 0;
+	z-index: 1001;
+	background: rgba(0, 0, 0, 0.85);
+	transition: all 300ms ease 0s;
+	align-items: center;
+	justify-content: center;
+}
+
+.top-bar {
+	background-color: rgba(0, 0, 0, 0.5);
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	display: flex;
+	justify-content: flex-end;
+	align-items: center;
+	height: 50px;
+	padding-right: 20px;
+}
+
+.close-button {
+	background: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgd2lkdGg9IjIwIiBoZWlnaHQ9IjIwIj48cGF0aCBkPSJtIDEsMyAxLjI1LC0xLjI1IDcuNSw3LjUgNy41LC03LjUgMS4yNSwxLjI1IC03LjUsNy41IDcuNSw3LjUgLTEuMjUsMS4yNSAtNy41LC03LjUgLTcuNSw3LjUgLTEuMjUsLTEuMjUgNy41LC03LjUgLTcuNSwtNy41IHoiIGZpbGw9IiNGRkYiLz48L3N2Zz4=")
+		no-repeat center;
+	width: 40px;
+	height: 35px;
+	cursor: pointer;
+	border: none;
+	opacity: 0.7;
+}
+
+.close-button:hover {
+	opacity: 1;
 }
