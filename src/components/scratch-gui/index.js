@@ -1,7 +1,6 @@
 import axios from "axios";
-import React, { useEffect, useRef, useState } from "react";
-import { useDispatch } from "react-redux";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import React, { useEffect, useRef } from "react";
+import { useParams } from "react-router-dom";
 import { compose } from "redux";
 
 import GUI from "../../third-party/scratch-gui/containers/gui.jsx";
@@ -16,10 +15,7 @@ const onClickLogo = () => {
 };
 
 export default function ScratchGUI() {
-	const [loading, setLoading] = useState(true);
-
 	const { id } = useParams();
-	const dispatch = useDispatch();
 
 	const subscribed = useRef(true);
 

@@ -30,7 +30,7 @@ export default function CodeRedirect() {
 			if (token) {
 				const getActivityData = async () => {
 					try {
-						const { data: responseData } = await axios.post(`${apiUrls.CONSUME_ACTIVITY}`, {
+						const { data: responseData } = await axios.post(`${apiUrls.CONSUME_REDIRECT}`, {
 							token,
 						});
 
@@ -39,7 +39,13 @@ export default function CodeRedirect() {
 
 							localStorage.setItem(TOKEN_NAME, data.accessToken);
 
-							return data.activity;
+							const { redirectId, redirectType, redirectData } = data;
+
+							return {
+								redirectId,
+								redirectType,
+								redirectData,
+							};
 						}
 						return null;
 					} catch (error) {
@@ -50,8 +56,8 @@ export default function CodeRedirect() {
 
 				getActivityData().then((activityData) => {
 					if (subscribed.current)
-						if (activityData) {
-							navigate(`/${activityData}`);
+						if (activityData?.redirectId) {
+							navigate(`/${activityData.redirectId}`);
 						} else {
 							navigate("/");
 						}

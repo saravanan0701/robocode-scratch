@@ -5,7 +5,7 @@ import { Provider } from "react-redux";
 
 import styles from "./styles/index.css";
 
-import HomePage from "./components/home-page";
+// import HomePage from "./components/home-page";
 
 import store from ".//third-party/scratch-gui/lib/new/store";
 import CodeRedirect from "./components/code-redirect";
@@ -49,7 +49,6 @@ const App = () => {
 				<Provider store={store}>
 					<BrowserRouter>
 						<Routes>
-							<Route path="/" element={<HomePage />} />
 							<Route path="/redirect" element={<CodeRedirect />} />
 							<Route path="/notfound" element={<NotFound />} />
 							<Route path="/:id" element={<ScratchGUI />} />
