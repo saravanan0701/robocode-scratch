@@ -149,7 +149,8 @@ const SBFileUploaderHOC = function (WrappedComponent) {
                 this.props.onLoadingStarted();
                 const filename = this.fileToUpload && this.fileToUpload.name;
                 let loadingSuccess = false;
-                console.log('23')
+                console.log(this.props.vm)
+                // fromJSON & toJSON
                 this.props.vm.loadProject(this.fileReader.result)
                     .then(() => {
                         if (filename) {

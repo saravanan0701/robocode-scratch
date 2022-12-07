@@ -7,7 +7,7 @@
   "scripts": {
     "start": "webpack-dev-server",
     "clean": "rimraf ./build && mkdirp build && rimraf ./dist && mkdirp dist",
-    "build": "npm run clean && webpack --colors --bail",
+    "build": "yarn clean && webpack --colors --bail",
     "serve": "npx serve -s build/"
   },
   "dependencies": {

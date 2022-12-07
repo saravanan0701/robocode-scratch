@@ -44,7 +44,6 @@ const vmManagerHOC = function (WrappedComponent) {
             // and they weren't both that way until now... load project!
             if (this.props.isLoadingWithId && this.props.fontsLoaded &&
                 (!prevProps.isLoadingWithId || !prevProps.fontsLoaded)) {
-                // console.log('fwe44')
                 this.loadProject();
             }
             // Start the VM if entering editor mode with an unstarted vm
@@ -53,7 +52,6 @@ const vmManagerHOC = function (WrappedComponent) {
             }
         }
         loadProject () {
-            console.log('fwe')
             return this.props.vm.loadProject(this.props.projectData)
                 .then(() => {
                     this.props.onLoadedProject(this.props.loadingState, this.props.canSave);
