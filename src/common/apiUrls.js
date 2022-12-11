@@ -5,6 +5,8 @@ export const API_URL = `${HOST}${BASE_API}`;
 
 const apiUrls = {
     CONSUME_REDIRECT: `${API_URL}redirectToken/consume`,
+    LOAD_ACTIVITY: `${API_URL}activity/student/load`,
+    STUDENT_PROFILE: `${API_URL}student/profile`,
 }
 
 export default apiUrls;

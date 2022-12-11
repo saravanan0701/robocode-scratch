@@ -1,7 +1,11 @@
 import axios from "axios";
 import React, { useEffect, useRef, useState } from "react";
+import { useDispatch } from "react-redux";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import api from "../../common/api";
 import apiUrls from "../../common/apiUrls";
+import store from "../../third-party/scratch-gui/lib/new/store";
+import { setAuthData } from "../../third-party/scratch-gui/reducers/new/main-reducer";
 import { TOKEN_NAME } from "../../utils";
 
 export default function CodeRedirect() {
@@ -9,6 +13,7 @@ export default function CodeRedirect() {
 
 	const [searchParams] = useSearchParams();
 	const navigate = useNavigate();
+	const dispatch = useDispatch();
 
 	const subscribed = useRef(true);
 
@@ -39,6 +44,16 @@ export default function CodeRedirect() {
 
 							localStorage.setItem(TOKEN_NAME, data.accessToken);
 
+							const authData = store.getState()?.main?.authData;
+
+							if (!authData) {
+								const profileRes = await api.doFetch("GET", `${apiUrls.STUDENT_PROFILE}`);
+
+								if (profileRes.success) {
+									dispatch(setAuthData(profileRes.data));
+								}
+							}
+
 							const { redirectId, redirectType, redirectData } = data;
 
 							return {
@@ -55,6 +70,7 @@ export default function CodeRedirect() {
 				};
 
 				getActivityData().then((activityData) => {
+					console.log({activityData})
 					if (subscribed.current)
 						if (activityData?.redirectId) {
 							navigate(`/${activityData.redirectId}`);
@@ -68,7 +84,7 @@ export default function CodeRedirect() {
 		}
 
 		if (subscribed.current) navigate("/");
-	}, [navigate, searchParams]);
+	}, [navigate, dispatch, searchParams]);
 
 	if (loading) return <>Loading ...</>;
 

@@ -1,4 +1,5 @@
 import axios from "axios";
+import { TOKEN_NAME } from "../utils";
 import { HOST } from "./apiUrls";
 
 export const axiosApi = axios.create({
@@ -27,13 +28,17 @@ const sanitizeMethod = (method) => {
 	return method;
 };
 
-/** @type { (res: import('axios').AxiosResponse ) => void } */
-const handleResponse = res => {
-    return {}
+const getToken = () => {
+	return localStorage.getItem(TOKEN_NAME) || null;
 };
 
-const handleErrors = res => {
-    return {}
+/** @type { (res: import('axios').AxiosResponse ) => ({}) } } */
+const handleResponse = (res) => {
+	return res.data;
+};
+
+const handleErrors = (res) => {
+	return { error: "Pending" };
 };
 
 function API() {
@@ -41,12 +46,24 @@ function API() {
 		try {
 			method = sanitizeMethod(method);
 
+			if (typeof options !== "object") {
+				options = {};
+			}
+
+			const token = localStorage.getItem(TOKEN_NAME);
+
+			options.headers = {
+				"x-auth-token": token,
+			};
+
 			return axios({
 				method,
 				url,
 				data,
 				...options,
-			}).then(handleResponse).catch(handleErrors);
+			})
+				.then(handleResponse)
+				.catch(handleErrors);
 		} catch (error) {
 			console.log(error);
 		}

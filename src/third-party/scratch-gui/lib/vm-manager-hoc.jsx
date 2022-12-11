@@ -13,6 +13,7 @@ import {
     onLoadedProject,
     projectError
 } from '../reducers/project-state';
+import axios from 'axios';
 
 /*
  * Higher Order Component to manage events emitted by the VM
@@ -35,22 +36,29 @@ const vmManagerHOC = function (WrappedComponent) {
                 this.props.vm.initialized = true;
                 this.props.vm.setLocale(this.props.locale, this.props.messages);
             }
-            if (!this.props.isPlayerOnly && !this.props.isStarted) {
-                this.props.vm.start();
-            }
         }
-        componentDidUpdate (prevProps) {
-            // if project is in loading state, AND fonts are loaded,
-            // and they weren't both that way until now... load project!
-            if (this.props.isLoadingWithId && this.props.fontsLoaded &&
-                (!prevProps.isLoadingWithId || !prevProps.fontsLoaded)) {
-                this.loadProject();
-            }
-            // Start the VM if entering editor mode with an unstarted vm
-            if (!this.props.isPlayerOnly && !this.props.isStarted) {
-                this.props.vm.start();
-            }
-        }
+        async componentDidUpdate(prevProps) {
+			// if project is in loading state, AND fonts are loaded,
+			// and they weren't both that way until now... load project!
+			if (this.props.activityData) {
+				// Start the VM if entering editor mode with an unstarted vm
+				if (!this.props.isStarted) {
+					const { scratchFile } = this.props.activityData;
+
+                    if (scratchFile) {
+                        const fileRes = await axios.get(`${scratchFile}`, { responseType: 'arraybuffer' });
+                        await this.props.vm.loadProject(fileRes.data)
+
+                        this.props.onLoadedProject(this.props.loadingState, this.props.canSave)
+                        setTimeout(() => this.props.onSetProjectUnchanged());
+                        // Wrap in a setTimeout because skin loading in
+                        // the renderer can be async.
+                        setTimeout(() => this.props.vm.renderer.draw());
+                        this.props.vm.start();
+                    }
+				}
+			}
+		}
         loadProject () {
             return this.props.vm.loadProject(this.props.projectData)
                 .then(() => {
@@ -79,6 +87,7 @@ const vmManagerHOC = function (WrappedComponent) {
                 /* eslint-disable no-unused-vars */
                 fontsLoaded,
                 loadingState,
+                activityData,
                 locale,
                 messages,
                 isStarted,
@@ -124,6 +133,7 @@ const vmManagerHOC = function (WrappedComponent) {
         const loadingState = state.scratchGui.projectState.loadingState;
         return {
             fontsLoaded: state.scratchGui.fontsLoaded,
+            activityData: state.main.activityData,
             isLoadingWithId: getIsLoadingWithId(loadingState),
             locale: state.locales.locale,
             messages: state.locales.messages,

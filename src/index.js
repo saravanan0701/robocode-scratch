@@ -1,4 +1,4 @@
-import React, { Suspense, useEffect } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Provider } from "react-redux";
@@ -11,6 +11,12 @@ import store from ".//third-party/scratch-gui/lib/new/store";
 import CodeRedirect from "./components/code-redirect";
 import { TOKEN_NAME } from "./utils";
 import NotFound from "./components/not-found";
+import api from "./common/api";
+import apiUrls from "./common/apiUrls";
+import { useDispatch } from "react-redux";
+import { setAuthData } from "./third-party/scratch-gui/reducers/new/main-reducer";
+import HomePage from "./components/home-page";
+import Loader from "./components/common/loader.jsx";
 
 const ScratchGUI = React.lazy(() => import("./components/scratch-gui"));
 const appTarget = document.getElementById("root");
@@ -47,18 +53,53 @@ const App = () => {
 		<React.Fragment>
 			<Suspense fallback={<div>Loading ...</div>}>
 				<Provider store={store}>
-					<BrowserRouter>
-						<Routes>
-							<Route path="/redirect" element={<CodeRedirect />} />
-							<Route path="/notfound" element={<NotFound />} />
-							<Route path="/:id" element={<ScratchGUI />} />
-							<Route path="*" element={<NotFound />} />
-						</Routes>
-					</BrowserRouter>
+					<InnerApp />
 				</Provider>
 			</Suspense>
 		</React.Fragment>
 	);
 };
+
+function InnerApp() {
+	const [loading, setLoading] = useState(true);
+	const dispatch = useDispatch();
+
+	useEffect(() => {
+		const getData = async () => {
+			try {
+				setLoading(true);
+
+				const token = localStorage.getItem(TOKEN_NAME);
+
+				if (token) {
+					const profileRes = await api.doFetch("GET", `${apiUrls.STUDENT_PROFILE}`);
+
+					if (profileRes.success) {
+						dispatch(setAuthData(profileRes.data));
+					}
+				}
+			} catch (error) {
+			} finally {
+				setLoading(false);
+			}
+		};
+
+		getData();
+	}, [dispatch]);
+
+	if (loading) return <Loader />;
+
+	return (
+		<BrowserRouter>
+			<Routes>
+				<Route path="/" element={<HomePage />} />
+				<Route path="/redirect" element={<CodeRedirect />} />
+				<Route path="/notfound" element={<NotFound />} />
+				<Route path="/:id" element={<ScratchGUI />} />
+				<Route path="*" element={<NotFound />} />
+			</Routes>
+		</BrowserRouter>
+	);
+}
 
 root.render(<App />);
