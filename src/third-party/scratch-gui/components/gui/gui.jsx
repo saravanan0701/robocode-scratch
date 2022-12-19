@@ -1,7 +1,7 @@
 import classNames from "classnames";
 import omit from "lodash.omit";
 import PropTypes from "prop-types";
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { defineMessages, FormattedMessage, injectIntl, intlShape } from "react-intl";
 import { connect } from "react-redux";
 import MediaQuery from "react-responsive";
@@ -35,14 +35,23 @@ import layout, { STAGE_SIZE_MODES } from "../../lib/layout-constants";
 import { resolveStageSize } from "../../lib/screen-utils";
 
 import styles from "./gui.css";
+import cardStyles from "./guiCard.css";
+
 import addExtensionIcon from "./icon--extensions.svg";
 import documentIcon from "./icon--document.svg";
 import codeIcon from "./icon--code.svg";
 import costumesIcon from "./icon--costumes.svg";
 import soundsIcon from "./icon--sounds.svg";
 import { useSelector } from "react-redux";
-import ReactDocViewer, { PDFRenderer, DocRenderer, DocViewerRenderers } from "react-doc-viewer";
+import ReactDocViewer, { DocViewerRenderers } from "react-doc-viewer";
 import { Modal } from "antd";
+
+import rightArrow from "../cards/icon--next.svg";
+import leftArrow from "../cards/icon--prev.svg";
+
+import closeIcon from "../cards/icon--close.svg";
+import debounce from "lodash.debounce";
+import ReactPlayer from "react-player";
 
 const messages = defineMessages({
 	addExtension: {
@@ -128,7 +137,7 @@ const GUIComponent = (props) => {
 	const activityData = useSelector((state) => state.main.activityData);
 	const [numPages, setNumPages] = useState(null);
 	const [pageNumber, setPageNumber] = useState(1);
-	const [isModalOpen, setIsModalOpen] = useState(false);
+	const [isModalOpen, setIsModalOpen] = useState(true);
 
 	function onDocumentLoadSuccess({ numPages }) {
 		setNumPages(numPages);
@@ -277,33 +286,18 @@ const GUIComponent = (props) => {
 													vm={vm}
 												/>
 											</Box>
-											{isModalOpen && (
-												<Modal
-													width={"100vw"}
-													bodyStyle={{
-														display: "flex",
-														justifyContent: "center",
-														alignItems: "center",
-													}}
-													centered
-													open={isModalOpen}
-													onCancel={() => setIsModalOpen(false)}
-													footer={null}>
-													<ReactDocViewer
-														style={{ width: "90vw", height: "90vh" }}
-														pluginRenderers={DocViewerRenderers}
-														documents={activityData?.documents?.map((d) => ({
-															uri: d.url,
-															fileType: d.documentType,
-														}))}
-														config={{
-															header: {
-																disableFileName: true,
-															},
-														}}
-													/>
-												</Modal>
+
+											{activityData?.documents && (
+												<DocumentViewerCard
+													isModalOpen={isModalOpen}
+													setIsModalOpen={setIsModalOpen}
+													documents={activityData?.documents?.map((d) => ({
+														uri: d.url,
+														fileType: d.documentType,
+													}))}
+												/>
 											)}
+
 											<Box className={styles.viewerButtonContainer}>
 												<button
 													className={styles.extensionButton}
@@ -454,3 +448,148 @@ const mapStateToProps = (state) => ({
 });
 
 export default injectIntl(connect(mapStateToProps)(GUIComponent));
+
+const CardHeader = ({ onClose }) => (
+	<div className={cardStyles.headerButtons}>
+		<div className={cardStyles.allButton}></div>
+
+		<div className={cardStyles.headerButtonsRight}>
+			<div className={cardStyles.shrinkExpandButton}></div>
+			<div className={cardStyles.removeButton} onClick={onClose}>
+				<img className={cardStyles.closeIcon} src={closeIcon} />
+				<FormattedMessage
+					defaultMessage="Close"
+					description="Title for button to close how-to card"
+					id="gui.cards.close"
+				/>
+			</div>
+		</div>
+	</div>
+);
+
+const NextPrevButtons = ({ onNextStep, onPrevStep }) => {
+	console.log(JSON.stringify({ onNextStep, onPrevStep }));
+	return (
+		<React.Fragment>
+			{onNextStep ? (
+				<div>
+					<div className={cardStyles.rightCard} />
+					<div className={cardStyles.rightButton} onClick={onNextStep}>
+						<img draggable={false} src={rightArrow} />
+					</div>
+				</div>
+			) : null}
+
+			{onPrevStep ? (
+				<div>
+					<div className={cardStyles.leftCard} />
+					<div className={cardStyles.leftButton} onClick={onPrevStep}>
+						<img draggable={false} src={leftArrow} />
+					</div>
+				</div>
+			) : null}
+		</React.Fragment>
+	);
+};
+
+function DocumentViewerCard({ isModalOpen = false, setIsModalOpen = () => {}, documents = [] }) {
+	const [documentIndex, setDocumentIndex] = useState(0);
+
+	const onBack = useMemo(
+		() =>
+			debounce(() => {
+				setDocumentIndex((s) => s - 1);
+			}, 250),
+		[]
+	);
+
+	const onNext = useMemo(
+		() =>
+			debounce(() => {
+				setDocumentIndex((s) => s + 1);
+			}, 250),
+		[]
+	);
+
+	const currentDoc = useMemo(() => {
+		if (documentIndex > -1 && documentIndex < documents.length) {
+			return documents[documentIndex];
+		}
+
+		return null;
+	}, [documents, documentIndex]);
+
+	if (!isModalOpen || documents.length === 0 || currentDoc === null) return null;
+
+	return (
+		<Modal
+			centered
+			width="70vw"
+			open={isModalOpen}
+			onCancel={() => setIsModalOpen(false)}
+			footer={null}
+			destroyOnClose={true}
+			className="ant-modal-documents"
+			bodyStyle={{
+				margin: "-20px -24px",
+				overflow: "hidden",
+				borderRadius: 8,
+				boxShadow: " 0px 0px 30px -2px rgba(0,0,0,0.49)",
+			}}
+			closable={false}>
+			<div className={cardStyles.cardModalWrapper}>
+				<CardHeader onClose={() => setIsModalOpen(false)} />
+				<div className={cardStyles.cardModalBody}>
+					<DocumentViewer currentDoc={currentDoc} />
+				</div>
+			</div>
+			<NextPrevButtons
+				onPrevStep={documentIndex > 0 ? onBack : null}
+				onNextStep={documentIndex < documents.length - 1 ? onNext : null}
+			/>
+		</Modal>
+	);
+}
+
+const reactPlayerConfig = {
+	youtube: {
+		embedOptions: {
+			host: "https://www.youtube-nocookie.com",
+		},
+		playerVars: {
+			modestbranding: 1,
+			fs: 1,
+			iv_load_policy: 3,
+			autohide: 0,
+			autoplay: 0,
+		},
+	},
+};
+
+function DocumentViewer({ currentDoc }) {
+	if (!currentDoc) return null;
+
+	switch (currentDoc.fileType) {
+		case "image":
+			return (
+				<div className={cardStyles.cardImageWrapper}>
+					<img className={cardStyles.cardImageWrapperImg} src={currentDoc.uri} alt="currentDoc-image" />
+				</div>
+			);
+		case "video":
+			return (
+				<div className={cardStyles.cardVideoWrapper}>
+					<ReactPlayer width="100%" height="100%" url={currentDoc.uri} config={reactPlayerConfig} />
+				</div>
+			);
+		default:
+			return (
+				<ReactDocViewer
+					documents={[currentDoc]}
+					pluginRenderers={DocViewerRenderers}
+					config={{ header: { disableHeader: true, disableFileName: true } }}
+					style={{ height: "100%" }}
+				/>
+			);
+	}
+}

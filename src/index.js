@@ -4,6 +4,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Provider } from "react-redux";
 
 import styles from "./styles/index.css";
+import "./styles/global.css";
 
 // import HomePage from "./components/home-page";
 
@@ -17,6 +18,7 @@ import { useDispatch } from "react-redux";
 import { setAuthData } from "./third-party/scratch-gui/reducers/new/main-reducer";
 import HomePage from "./components/home-page";
 import Loader from "./components/common/loader.jsx";
+import { useSelector } from "react-redux";
 
 const ScratchGUI = React.lazy(() => import("./components/scratch-gui"));
 const appTarget = document.getElementById("root");
@@ -42,10 +44,29 @@ const App = () => {
 			}
 		};
 
+		const handleStorageEvent = (event) => {
+			if (!event) return;
+
+			let authChange = false;
+
+			if (event.key === "userdetail") {
+				authChange = true;
+			} else if (event.key === null && event.newValue === null) {
+				authChange = true;
+			}
+
+			if (authChange) {
+				window.location.href = "/";
+			}
+		};
+
+		window.onstorage = handleStorageEvent;
+
 		window.addEventListener("message", handleMessageEvent);
 
 		return () => {
 			window.removeEventListener("message", handleMessageEvent);
+			window.onstorage = null;
 		};
 	}, []);
 
@@ -63,6 +84,10 @@ const App = () => {
 function InnerApp() {
 	const [loading, setLoading] = useState(true);
 	const dispatch = useDispatch();
+
+	const { vm } = useSelector(state => state.scratchGui)
+
+	vm.blockListener = () => {};
 
 	useEffect(() => {
 		const getData = async () => {

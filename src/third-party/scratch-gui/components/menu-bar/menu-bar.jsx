@@ -5,7 +5,7 @@ import { defineMessages, FormattedMessage, injectIntl, intlShape } from "react-i
 import PropTypes from "prop-types";
 import bindAll from "lodash.bindall";
 import bowser, { a } from "bowser";
-import React from "react";
+import React, { useState } from "react";
 
 import VM from "scratch-vm";
 
@@ -28,8 +28,8 @@ import SB3Downloader from "../../containers/sb3-downloader.jsx";
 import DeletionRestorer from "../../containers/deletion-restorer.jsx";
 import TurboMode from "../../containers/turbo-mode.jsx";
 import MenuBarHOC from "../../containers/menu-bar-hoc.jsx";
-import { Dropdown, Button as AntButton } from "antd";
-
+import { Dropdown, Button as AntButton, Input, Space, Modal,  } from "antd";
+import { DownOutlined } from "@ant-design/icons"
 import { openTipsLibrary } from "../../reducers/modals";
 import { setPlayer } from "../../reducers/mode";
 import {
@@ -65,6 +65,7 @@ import {
 import collectMetadata from "../../lib/collect-metadata";
 
 import styles from "./menu-bar.css";
+import projectTitleInputStyles from "./project-title-input.css";
 
 import helpIcon from "../../lib/assets/icon--tutorials.svg";
 import mystuffIcon from "./icon--mystuff.png";
@@ -77,6 +78,7 @@ import aboutIcon from "./icon--about.svg";
 import scratchLogo from "./scratch-logo.svg";
 
 import sharedMessages from "../../lib/shared-messages";
+import { useEffect } from "react";
 
 const ariaMessages = defineMessages({
 	language: {
@@ -381,10 +383,6 @@ class MenuBar extends React.Component {
 								menu={{
 									items: [
 										{
-											key: "1",
-											label: <a>Save</a>,
-										},
-										{
 											key: "2",
 											label: (
 												<SB3Downloader>
@@ -465,6 +463,7 @@ class MenuBar extends React.Component {
 						<FormattedMessage {...ariaMessages.tutorials} />
 					</div>
 					<Divider className={classNames(styles.divider)} />
+							<SaveInput />
 					{this.props.canEditTitle ? (
 						<div className={classNames(styles.menuBarItem, styles.growable)}>
 							<MenuBarItemTooltip enable id="title-field">
@@ -799,3 +798,57 @@ const mapDispatchToProps = (dispatch) => ({
 });
 
 export default compose(injectIntl, MenuBarHOC, connect(mapStateToProps, mapDispatchToProps))(MenuBar);
+
+function SaveInput() {
+	const { activityData } = useSelector((state) => state.main);
+
+	const [name, setName] = useState("");
+	const [open, setOpen] = useState(false);
+
+	const handleChangeName = (e) => {
+		const value = e.target.value;
+
+		setName(value);
+	};
+
+	const handleToggleModal = () => {
+		setOpen(o => !o);
+	}
+
+	useEffect(() => {
+		if (activityData?.name) {
+			setName(activityData?.name);
+		}
+	}, [activityData]);
+
+	if (!activityData) return null;
+
+	return (
+		<>
+			<Modal onCancel={handleToggleModal} footer={null} open={open}>
+				<p>Hello</p>
+			</Modal>
+
+			<Space compact style={{ width: "auto", display: "flex" }}>
+				<Input
+					className={classNames(projectTitleInputStyles.titleField, styles.titleFieldGrowable)}
+					style={{ width: "calc(200px)" }}
+					value={name}
+					onChange={handleChangeName}
+				/>
+
+				<Dropdown.Button placement="topRight" icon={<DownOutlined style={{ fontSize: 12 }}/>}
+					menu={{
+						items: [
+							{
+								key: "1",
+								label: <a onClick={handleToggleModal}>Save As</a>,
+							},
+						],
+					}}>
+					Save
+				</Dropdown.Button>
+			</Space>
+		</>
+	);
+}

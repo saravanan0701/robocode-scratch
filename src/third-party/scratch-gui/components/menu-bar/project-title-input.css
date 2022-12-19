@@ -15,7 +15,7 @@ can set a width for example or what it should do in a flex box (eg. grow).
     background-color: $ui-white-transparent;
     background-clip: padding-box;
     -webkit-background-clip: padding-box;
-    height: auto;
+    height: 32px;
     padding: .5rem;
 }
 

@@ -2,6 +2,8 @@ import axios from "axios";
 import React, { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import qs from "query-string";
+
 import api from "../../common/api";
 import apiUrls from "../../common/apiUrls";
 import store from "../../third-party/scratch-gui/lib/new/store";
@@ -70,13 +72,19 @@ export default function CodeRedirect() {
 				};
 
 				getActivityData().then((activityData) => {
-					console.log({activityData})
-					if (subscribed.current)
+					if (subscribed.current) {
 						if (activityData?.redirectId) {
-							navigate(`/${activityData.redirectId}`);
-						} else {
-							navigate("/");
+							const { redirectData } = activityData;
+
+							if (redirectData) {
+								const { type, activity_type: activityType } = redirectData;
+								const searchString = qs.stringify({ type, activityType });
+
+								return navigate(`/${activityData.redirectId}?${searchString}`, { replace: true });
+							}
 						}
+						navigate("/");
+					}
 				});
 
 				return;
