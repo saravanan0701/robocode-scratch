@@ -47,6 +47,8 @@ const filteredConfig = Object.keys(configParsed).reduce((pv, configKey) => {
 
 const STATIC_PATH = process.env.STATIC_PATH || "/static";
 
+console.log({configParsed})
+
 const base = {
 	mode: configParsed.NODE_ENV === "production" ? "production" : "development",
 	devtool: "cheap-module-source-map",
