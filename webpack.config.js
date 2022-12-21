@@ -28,7 +28,7 @@ if (!configParsed) {
 		NODE_ENV: "development",
 		HOST: "localhost",
 		PORT: 3000,
-		...process?.env || {}
+		...((process && process.env) || {}),
 	};
 }
 
@@ -48,7 +48,7 @@ const filteredConfig = Object.keys(configParsed).reduce((pv, configKey) => {
 
 const STATIC_PATH = process.env.STATIC_PATH || "/static";
 
-console.log(JSON.stringify(filteredConfig))
+console.log(JSON.stringify(filteredConfig));
 
 const base = {
 	mode: configParsed.NODE_ENV === "production" ? "production" : "development",
@@ -144,13 +144,13 @@ if (!process.env.CI) {
 	base.plugins.push(new webpack.ProgressPlugin());
 }
 
-if (filteredConfig.NODE_ENV === 'production') {
-	base.optimization.minimize = true
+if (filteredConfig.NODE_ENV === "production") {
+	base.optimization.minimize = true;
 	base.optimization.minimizer = [
 		new TerserPlugin({
 			include: /\.min\.js$/,
-		})
-	]
+		}),
+	];
 }
 
 module.exports = [

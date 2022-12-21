@@ -6,9 +6,14 @@
 			"dynamicImport": true,
 			"tsx": true
 		},
-		"target": "es2015"
+		"target": "es5",
+		"loose": true
 	},
+	"module": {
+		"type": "es6"
+	},
+	"isModule": true,
 	"env": {
-		"include": ["transform-async-to-generator", "proposal-object-rest-spread"]
+		"include": ["transform-async-to-generator", "proposal-object-rest-spread", "proposal-optional-chaining"]
 	}
 }
