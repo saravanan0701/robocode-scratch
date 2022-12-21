@@ -18,7 +18,6 @@ import { useDispatch } from "react-redux";
 import { setAuthData } from "./third-party/scratch-gui/reducers/new/main-reducer";
 import HomePage from "./components/home-page";
 import Loader from "./components/common/loader.jsx";
-import { useSelector } from "react-redux";
 
 const ScratchGUI = React.lazy(() => import("./components/scratch-gui"));
 const appTarget = document.getElementById("root");
@@ -84,10 +83,6 @@ const App = () => {
 function InnerApp() {
 	const [loading, setLoading] = useState(true);
 	const dispatch = useDispatch();
-
-	const { vm } = useSelector(state => state.scratchGui)
-
-	vm.blockListener = () => {};
 
 	useEffect(() => {
 		const getData = async () => {

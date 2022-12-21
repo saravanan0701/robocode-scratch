@@ -77,8 +77,14 @@ export default function CodeRedirect() {
 							const { redirectData } = activityData;
 
 							if (redirectData) {
-								const { type, activity_type: activityType } = redirectData;
-								const searchString = qs.stringify({ type, activityType });
+								const { type, activity_type: activityType, id } = redirectData;
+
+								const data = { type };
+
+								if (id) data.id = id;
+								if (activityType) data.activityType = activityType;
+
+								const searchString = qs.stringify(data);
 
 								return navigate(`/${activityData.redirectId}?${searchString}`, { replace: true });
 							}

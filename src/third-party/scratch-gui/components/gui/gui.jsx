@@ -137,7 +137,7 @@ const GUIComponent = (props) => {
 	const activityData = useSelector((state) => state.main.activityData);
 	const [numPages, setNumPages] = useState(null);
 	const [pageNumber, setPageNumber] = useState(1);
-	const [isModalOpen, setIsModalOpen] = useState(true);
+	const [isModalOpen, setIsModalOpen] = useState(false);
 
 	function onDocumentLoadSuccess({ numPages }) {
 		setNumPages(numPages);

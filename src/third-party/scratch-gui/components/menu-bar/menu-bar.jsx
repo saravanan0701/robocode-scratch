@@ -6,6 +6,7 @@ import PropTypes from "prop-types";
 import bindAll from "lodash.bindall";
 import bowser, { a } from "bowser";
 import React, { useState } from "react";
+import qs from "query-string";
 
 import VM from "scratch-vm";
 
@@ -28,8 +29,8 @@ import SB3Downloader from "../../containers/sb3-downloader.jsx";
 import DeletionRestorer from "../../containers/deletion-restorer.jsx";
 import TurboMode from "../../containers/turbo-mode.jsx";
 import MenuBarHOC from "../../containers/menu-bar-hoc.jsx";
-import { Dropdown, Button as AntButton, Input, Space, Modal,  } from "antd";
-import { DownOutlined } from "@ant-design/icons"
+import { Dropdown, Button as AntButton, Input, Space, Modal } from "antd";
+import { DownOutlined } from "@ant-design/icons";
 import { openTipsLibrary } from "../../reducers/modals";
 import { setPlayer } from "../../reducers/mode";
 import {
@@ -79,6 +80,9 @@ import scratchLogo from "./scratch-logo.svg";
 
 import sharedMessages from "../../lib/shared-messages";
 import { useEffect } from "react";
+import api from "../../../../common/api.js";
+import apiUrls from "../../../../common/apiUrls.js";
+import { useNavigate } from "react-router-dom";
 
 const ariaMessages = defineMessages({
 	language: {
@@ -463,7 +467,7 @@ class MenuBar extends React.Component {
 						<FormattedMessage {...ariaMessages.tutorials} />
 					</div>
 					<Divider className={classNames(styles.divider)} />
-							<SaveInput />
+					<SaveInput />
 					{this.props.canEditTitle ? (
 						<div className={classNames(styles.menuBarItem, styles.growable)}>
 							<MenuBarItemTooltip enable id="title-field">
@@ -801,8 +805,11 @@ export default compose(injectIntl, MenuBarHOC, connect(mapStateToProps, mapDispa
 
 function SaveInput() {
 	const { activityData } = useSelector((state) => state.main);
+	const { vm } = useSelector((state) => state.scratchGui);
+	const navigate = useNavigate();
 
 	const [name, setName] = useState("");
+	const [newName, setNewName] = useState("");
 	const [open, setOpen] = useState(false);
 
 	const handleChangeName = (e) => {
@@ -811,13 +818,88 @@ function SaveInput() {
 		setName(value);
 	};
 
-	const handleToggleModal = () => {
-		setOpen(o => !o);
-	}
+	const handleChangeNewName = (e) => {
+		const value = e.target.value;
+
+		setNewName(value);
+	};
+
+	const handleOpenModal = () => {
+		setOpen(true);
+	};
+
+	const handleCancelModal = () => {
+		setOpen(false);
+
+		setNewName("");
+	};
+
+	const handleSave = async () => {
+		const { studentActivity } = activityData || {};
+
+		if (!studentActivity || !studentActivity._id) return;
+
+		const body = {
+			name,
+		};
+
+		try {
+			body.activityData = vm.toJSON();
+		} catch (error) {}
+
+		try {
+			const saveActivityRes = await api.doFetch(
+				"POST",
+				`${apiUrls.SAVE_ACTIVITY}/${studentActivity._id}?activityType=scratch`,
+				body
+			);
+
+			if (saveActivityRes?.success) {
+				const data = saveActivityRes.data;
+
+				console.log({ data });
+			}
+		} catch (error) {}
+	};
+
+	const handleSaveNew = async () => {
+		const { studentActivity } = activityData || {};
+
+		if (!studentActivity || !studentActivity._id) return;
+		const new_name = newName.trim();
+
+		if (new_name.length < 3) {
+			// console.log('validation error')
+			return;
+		}
+
+		const body = { name: newName };
+
+		try {
+			const saveActivityRes = await api.doFetch("POST", `${apiUrls.SAVE_NEW_ACTIVITY}/${studentActivity._id}`, body);
+
+			if (saveActivityRes?.success) {
+				const data = saveActivityRes.data?.studentActivity;
+
+				if (!data) {
+					// error
+					return;
+				}
+
+				const urlData = { activityType: "scratch", id: data._id };
+
+				const searchString = qs.stringify(urlData);
+
+				const url = `/${data.activityId}?${searchString}`;
+
+				location.href = url;
+			}
+		} catch (error) {}
+	};
 
 	useEffect(() => {
-		if (activityData?.name) {
-			setName(activityData?.name);
+		if (activityData?.studentActivity) {
+			setName(activityData?.studentActivity?.name || activityData?.name);
 		}
 	}, [activityData]);
 
@@ -825,11 +907,11 @@ function SaveInput() {
 
 	return (
 		<>
-			<Modal onCancel={handleToggleModal} footer={null} open={open}>
-				<p>Hello</p>
+			<Modal title="Save to my projects" onCancel={handleCancelModal} open={open} onOk={handleSaveNew}>
+				<Input size="large" placeholder="Enter name" value={newName} onChange={handleChangeNewName} />
 			</Modal>
 
-			<Space compact style={{ width: "auto", display: "flex" }}>
+			<Space style={{ width: "auto", display: "flex" }}>
 				<Input
 					className={classNames(projectTitleInputStyles.titleField, styles.titleFieldGrowable)}
 					style={{ width: "calc(200px)" }}
@@ -837,12 +919,15 @@ function SaveInput() {
 					onChange={handleChangeName}
 				/>
 
-				<Dropdown.Button placement="topRight" icon={<DownOutlined style={{ fontSize: 12 }}/>}
+				<Dropdown.Button
+					placement="topRight"
+					icon={<DownOutlined style={{ fontSize: 12 }} />}
+					onClick={handleSave}
 					menu={{
 						items: [
 							{
 								key: "1",
-								label: <a onClick={handleToggleModal}>Save As</a>,
+								label: <a onClick={handleOpenModal}>Save to my projects</a>,
 							},
 						],
 					}}>

@@ -26,7 +26,7 @@ export default function ScratchGUI() {
 
 	const dispatch = useDispatch();
 
-	const vm = useSelector((state) => state?.scratchGui?.vm);
+	// const vm = useSelector((state) => state?.scratchGui?.vm);
 
 	const subscribed = useRef(true);
 
@@ -38,11 +38,11 @@ export default function ScratchGUI() {
 		};
 	}, []);
 
-	useEffect(() => {
-		vm.blockListener = debounce(function (ev) {
-			console.log(JSON.stringify(vm.toJSON()).length);
-		}, 2000);
-	}, [vm]);
+	// useEffect(() => {
+	// 	vm.blockListener = debounce(function (ev) {
+	// 		console.log(JSON.stringify(vm.toJSON()).length);
+	// 	}, 2000);
+	// }, [vm]);
 
 	useEffect(() => {
 		if (!id || !search) {
