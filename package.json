@@ -6,9 +6,10 @@
   "private": true,
   "scripts": {
     "start": "webpack-dev-server",
-    "clean": "rimraf ./build && mkdirp build && rimraf ./dist && mkdirp dist",
+    "clean": "yarn rimraf ./build && mkdirp build",
     "build": "yarn clean && webpack --colors --bail",
-    "serve": "npx serve -s build/"
+    "serve": "npx serve -s build/",
+    "rimraf": "./node_modules/rimraf/bin.js"
   },
   "dependencies": {
     "@ant-design/icons": "^4.8.0",
