@@ -4,6 +4,7 @@ const webpack = require("webpack");
 const dotenv = require("dotenv");
 
 // Plugins
+const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const TerserPlugin = require("terser-webpack-plugin");
@@ -48,6 +49,8 @@ const filteredConfig = Object.keys(configParsed).reduce((pv, configKey) => {
 
 const STATIC_PATH = process.env.STATIC_PATH || "/static";
 
+console.log(JSON.stringify(process.env));
+console.log(JSON.stringify(configParsed));
 console.log(JSON.stringify(filteredConfig));
 
 const base = {
@@ -143,6 +146,8 @@ const base = {
 if (!process.env.CI) {
 	base.plugins.push(new webpack.ProgressPlugin());
 }
+
+base.plugins.push(new CleanWebpackPlugin());
 
 if (filteredConfig.NODE_ENV === "production") {
 	base.optimization.minimize = true;
