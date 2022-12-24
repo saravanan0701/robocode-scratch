@@ -18,6 +18,7 @@ import { useDispatch } from "react-redux";
 import { setAuthData } from "./third-party/scratch-gui/reducers/new/main-reducer";
 import HomePage from "./components/home-page";
 import Loader from "./components/common/loader.jsx";
+import { ToastContainer } from "react-toastify";
 
 const ScratchGUI = React.lazy(() => import("./components/scratch-gui"));
 const appTarget = document.getElementById("root");
@@ -76,6 +77,8 @@ const App = () => {
 					<InnerApp />
 				</Provider>
 			</Suspense>
+
+			<ToastContainer autoClose={3000} position="top-center" theme="colored" />
 		</React.Fragment>
 	);
 };

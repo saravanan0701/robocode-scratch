@@ -24,6 +24,7 @@ const AccountNavComponent = ({ className }) => {
 		<React.Fragment>
 			<div style={{ paddingRight: 6 }}>
 				<Dropdown
+					className="profile-dropdown"
 					menu={{
 						items: [
 							{

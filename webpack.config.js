@@ -49,10 +49,6 @@ const filteredConfig = Object.keys(configParsed).reduce((pv, configKey) => {
 
 const STATIC_PATH = process.env.STATIC_PATH || "/static";
 
-console.log(JSON.stringify(process.env));
-console.log(JSON.stringify(configParsed));
-console.log(JSON.stringify(filteredConfig));
-
 const base = {
 	mode: configParsed.NODE_ENV === "production" ? "production" : "development",
 	devtool: "cheap-module-source-map",
@@ -203,22 +199,18 @@ module.exports = [
 						from: "static",
 						to: "static",
 					},
-				],
-			}),
-			new CopyWebpackPlugin({
-				patterns: [
 					{
 						from: "node_modules/scratch-blocks/media",
 						to: "static/blocks-media",
 					},
-				],
-			}),
-			new CopyWebpackPlugin({
-				patterns: [
 					{
 						from: "extension-worker.{js,js.map}",
 						context: "node_modules/scratch-vm/dist/web",
 					},
+					{
+						from: "node_modules/react-toastify/dist/ReactToastify.min.css",
+						to: "static/ReactToastify.min.css",
+					}
 				],
 			}),
 		]),

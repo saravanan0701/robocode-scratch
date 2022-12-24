@@ -7,7 +7,6 @@ import bindAll from "lodash.bindall";
 import bowser, { a } from "bowser";
 import React, { useState } from "react";
 import qs from "query-string";
-
 import VM from "scratch-vm";
 
 import Box from "../box/box.jsx";
@@ -83,6 +82,7 @@ import { useEffect } from "react";
 import api from "../../../../common/api.js";
 import apiUrls from "../../../../common/apiUrls.js";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const ariaMessages = defineMessages({
 	language: {
@@ -166,14 +166,148 @@ class MenuBar extends React.Component {
 			"handleRestoreOption",
 			"getSaveToComputerHandler",
 			"restoreOptionMessage",
+			"handleChangeName",
+			"handleSave",
+			"handleChangeNewName",
+			"handleOpenModal",
+			"handleCancelModal",
+			"handleSaveNew",
 		]);
+		this.state = {
+			name: "",
+			defaultName: "",
+			newName: "",
+			open: false,
+		};
 	}
+
 	componentDidMount() {
 		document.addEventListener("keydown", this.handleKeyPress);
 	}
+
+	componentDidUpdate(prevProps, prevState) {
+		if (prevProps.activityData === null && this.props.activityData) {
+			const { activityData } = this.props;
+
+			const name = activityData?.studentActivity?.name || activityData?.name;
+
+			this.setState({ name, defaultName: name });
+		}
+	}
+
 	componentWillUnmount() {
 		document.removeEventListener("keydown", this.handleKeyPress);
 	}
+
+	handleChangeName(e) {
+		const name = e.target.value;
+
+		this.setState({ name });
+	}
+
+	handleChangeNewName(e) {
+		const newName = e.target.value;
+
+		this.setState({ newName });
+	}
+
+	handleOpenModal() {
+		this.setState({ open: true });
+	}
+
+	handleCancelModal() {
+		this.setState({ open: false, newName: "" });
+	}
+
+	async handleSave() {
+		const { studentActivity } = this.props.activityData || {};
+
+		if (!studentActivity || !studentActivity._id) return;
+
+		let { name, defaultName } = this.state;
+		name = name.trim();
+
+		const body = {
+			name: this.state.name,
+		};
+
+		try {
+			body.activityData = this.props.vm.toJSON();
+		} catch (error) {}
+
+		try {
+			if (defaultName === name) {
+				const saveActivityRes = await api.doFetch(
+					"POST",
+					`${apiUrls.SAVE_ACTIVITY}/${studentActivity._id}?activityType=scratch`,
+					body
+				);
+
+				if (saveActivityRes?.success) {
+					toast.success("Saved successfully");
+				} else {
+					toast.warning("There was a problem saving the activity");
+				}
+			} else {
+				const saveActivityRes = await api.doFetch("POST", `${apiUrls.SAVE_NEW_ACTIVITY}/${studentActivity._id}`, body);
+
+				if (saveActivityRes?.success) {
+					const data = saveActivityRes.data?.studentActivity;
+
+					if (!data) return;
+
+					const urlData = { activityType: "scratch", id: data._id };
+					const searchString = qs.stringify(urlData);
+					const url = `/${data.activityId}?${searchString}`;
+
+					location.href = url;
+				} else {
+					toast.warning("There was a problem saving the activity");
+				}
+			}
+		} catch (error) {
+			toast.warning("There was a problem saving the activity");
+		}
+	}
+
+	handleSaveNew = async () => {
+		const { studentActivity } = this.props.activityData || {};
+
+		if (!studentActivity || !studentActivity._id) return;
+
+		const { newName } = this.state;
+		const new_name = newName.trim();
+
+		if (new_name.length < 3) {
+			toast.warning("Name must be more than 3 characters");
+			return;
+		}
+
+		const body = { name: new_name };
+
+		try {
+			const saveActivityRes = await api.doFetch("POST", `${apiUrls.SAVE_NEW_ACTIVITY}/${studentActivity._id}`, body);
+
+			if (saveActivityRes?.success) {
+				const data = saveActivityRes.data?.studentActivity;
+
+				if (!data) {
+					return;
+				}
+
+				const urlData = { activityType: "scratch", id: data._id };
+
+				const searchString = qs.stringify(urlData);
+
+				const url = `/${data.activityId}?${searchString}`;
+
+				location.href = url;
+			}
+		} catch (error) {
+			toast.warning("There was a problem saving the activity");
+		}
+	};
+
 	handleClickNew() {
 		// if the project is dirty, and user owns the project, we will autosave.
 		// but if they are not logged in and can't save, user should consider
@@ -373,7 +507,8 @@ class MenuBar extends React.Component {
 								onClick={this.props.onClickLogo}
 							/>
 						</div>
-						{this.props.canChangeLanguage && (
+						<Divider className={classNames(styles.divider)} />
+						{/* {this.props.canChangeLanguage && (
 							<div className={classNames(styles.menuBarItem, styles.hoverable, styles.languageMenu)}>
 								<div>
 									<img className={styles.languageIcon} src={languageIcon} />
@@ -381,23 +516,32 @@ class MenuBar extends React.Component {
 								</div>
 								<LanguageSelector label={this.props.intl.formatMessage(ariaMessages.language)} />
 							</div>
-						)}
+						)} */}
 						{this.props.canManageFiles && (
 							<Dropdown
+								trigger={["click"]}
 								menu={{
 									items: [
 										{
-											key: "2",
-											label: (
-												<SB3Downloader>
-													{(_className, downloadProjectCallback) => (
-														<a onClick={this.getSaveToComputerHandler(downloadProjectCallback)}>
-															Save to computer
-														</a>
-													)}
-												</SB3Downloader>
-											),
+											key: "1",
+											label: <a onClick={this.handleSave}>Save</a>,
 										},
+										{
+											key: "2",
+											label: <a onClick={this.handleOpenModal}>Save As</a>,
+										},
+										// {
+										// 	key: "3",
+										// 	label: (
+										// 		<SB3Downloader>
+										// 			{(_className, downloadProjectCallback) => (
+										// 				<a onClick={this.getSaveToComputerHandler(downloadProjectCallback)}>
+										// 					Save to computer
+										// 				</a>
+										// 			)}
+										// 		</SB3Downloader>
+										// 	),
+										// },
 									],
 								}}
 								placement="topLeft"
@@ -405,7 +549,7 @@ class MenuBar extends React.Component {
 								<AntButton
 									className={classNames(styles.menuBarItem, styles.hoverable)}
 									type="ghost"
-									style={{ color: "#fff", fontWeight: 600, borderRadius: 0, marginRight: 4, marginLeft: 4 }}>
+									style={{ color: "#fff", fontWeight: 600, borderRadius: 0 }}>
 									<FormattedMessage
 										defaultMessage="File"
 										description="Text for file dropdown menu"
@@ -414,8 +558,8 @@ class MenuBar extends React.Component {
 								</AntButton>
 							</Dropdown>
 						)}
-
-						<Dropdown
+						<Divider className={classNames(styles.divider)} />
+						{/* <Dropdown
 							menu={{
 								items: [
 									{
@@ -456,18 +600,41 @@ class MenuBar extends React.Component {
 									id="gui.menuBar.edit"
 								/>
 							</AntButton>
-						</Dropdown>
+						</Dropdown> */}
 					</div>
-					<Divider className={classNames(styles.divider)} />
-					<div
+					{/* <Divider className={classNames(styles.divider)} /> */}
+					{/* <div
 						aria-label={this.props.intl.formatMessage(ariaMessages.tutorials)}
 						className={classNames(styles.menuBarItem, styles.hoverable)}
 						onClick={this.props.onOpenTipLibrary}>
 						<img className={styles.helpIcon} src={helpIcon} />
 						<FormattedMessage {...ariaMessages.tutorials} />
-					</div>
-					<Divider className={classNames(styles.divider)} />
-					<SaveInput />
+					</div> */}
+					{/* <Divider className={classNames(styles.divider)} /> */}
+					<Modal
+						title="Save to my projects"
+						onCancel={this.handleCancelModal}
+						open={this.state.open}
+						onOk={this.handleSaveNew}>
+						<Input
+							size="large"
+							placeholder="Enter name"
+							value={this.state.newName}
+							onChange={this.handleChangeNewName}
+						/>
+					</Modal>
+
+					<Space style={{ width: "auto", display: "flex" }}>
+						<Input
+							className={classNames(projectTitleInputStyles.titleField, styles.titleFieldGrowable)}
+							style={{ width: "calc(200px)" }}
+							value={this.state.name}
+							onChange={this.handleChangeName}
+						/>
+
+						<AntButton onClick={this.handleSave}>Save</AntButton>
+					</Space>
+
 					{this.props.canEditTitle ? (
 						<div className={classNames(styles.menuBarItem, styles.growable)}>
 							<MenuBarItemTooltip enable id="title-field">
@@ -760,6 +927,7 @@ MenuBar.defaultProps = {
 const mapStateToProps = (state, ownProps) => {
 	const loadingState = state.scratchGui.projectState.loadingState;
 	const user = state.session && state.session.session && state.session.session.user;
+
 	return {
 		aboutMenuOpen: aboutMenuOpen(state),
 		accountMenuOpen: accountMenuOpen(state),
@@ -776,6 +944,7 @@ const mapStateToProps = (state, ownProps) => {
 		username: user ? user.username : null,
 		userOwnsProject: ownProps.authorUsername && user && ownProps.authorUsername === user.username,
 		vm: state.scratchGui.vm,
+		activityData: state.main.activityData,
 	};
 };
 
@@ -803,10 +972,9 @@ const mapDispatchToProps = (dispatch) => ({
 
 export default compose(injectIntl, MenuBarHOC, connect(mapStateToProps, mapDispatchToProps))(MenuBar);
 
-function SaveInput() {
+function SaveInput({ handleSave }) {
 	const { activityData } = useSelector((state) => state.main);
 	const { vm } = useSelector((state) => state.scratchGui);
-	const navigate = useNavigate();
 
 	const [name, setName] = useState("");
 	const [newName, setNewName] = useState("");
@@ -824,43 +992,39 @@ function SaveInput() {
 		setNewName(value);
 	};
 
-	const handleOpenModal = () => {
-		setOpen(true);
-	};
-
 	const handleCancelModal = () => {
 		setOpen(false);
 
 		setNewName("");
 	};
 
-	const handleSave = async () => {
-		const { studentActivity } = activityData || {};
+	// const handleSave = async () => {
+	// 	const { studentActivity } = activityData || {};
 
-		if (!studentActivity || !studentActivity._id) return;
+	// 	if (!studentActivity || !studentActivity._id) return;
 
-		const body = {
-			name,
-		};
+	// 	const body = {
+	// 		name,
+	// 	};
 
-		try {
-			body.activityData = vm.toJSON();
-		} catch (error) {}
+	// 	try {
+	// 		body.activityData = vm.toJSON();
+	// 	} catch (error) {}
 
-		try {
-			const saveActivityRes = await api.doFetch(
-				"POST",
-				`${apiUrls.SAVE_ACTIVITY}/${studentActivity._id}?activityType=scratch`,
-				body
-			);
+	// 	try {
+	// 		const saveActivityRes = await api.doFetch(
+	// 			"POST",
+	// 			`${apiUrls.SAVE_ACTIVITY}/${studentActivity._id}?activityType=scratch`,
+	// 			body
+	// 		);
 
-			if (saveActivityRes?.success) {
-				const data = saveActivityRes.data;
+	// 		if (saveActivityRes?.success) {
+	// 			const data = saveActivityRes.data;
 
-				console.log({ data });
-			}
-		} catch (error) {}
-	};
+	// 			console.log({ data });
+	// 		}
+	// 	} catch (error) {}
+	// };
 
 	const handleSaveNew = async () => {
 		const { studentActivity } = activityData || {};
@@ -919,20 +1083,7 @@ function SaveInput() {
 					onChange={handleChangeName}
 				/>
 
-				<Dropdown.Button
-					placement="topRight"
-					icon={<DownOutlined style={{ fontSize: 12 }} />}
-					onClick={handleSave}
-					menu={{
-						items: [
-							{
-								key: "1",
-								label: <a onClick={handleOpenModal}>Save to my projects</a>,
-							},
-						],
-					}}>
-					Save
-				</Dropdown.Button>
+				<AntButton onClick={handleSave}>Save</AntButton>
 			</Space>
 		</>
 	);
