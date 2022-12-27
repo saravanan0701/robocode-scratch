@@ -14,6 +14,7 @@ import styles from "./account-nav.css";
 import { useSelector } from "react-redux";
 import { Button, Dropdown } from "antd";
 import AccountNavLogout from "./new/account-nav-logout.jsx";
+import { Capitalize } from "../../../../utils/constants";
 
 const AccountNavComponent = ({ className }) => {
 	const { authData } = useSelector((state) => state.main);
@@ -43,7 +44,7 @@ const AccountNavComponent = ({ className }) => {
 						className={classNames(styles.userInfo, className)}
 						type="ghost"
 						style={{ color: "#fff", fontWeight: 600, borderRadius: 0 }}>
-						<span className={styles.profileName}>Hi, {authData.name}</span>
+						<span className={styles.profileName}>Hi, {Capitalize(authData?.name)}</span>
 						<div className={styles.dropdownCaretPosition}>
 							<img className={styles.dropdownCaretIcon} src={dropdownCaret} />
 						</div>

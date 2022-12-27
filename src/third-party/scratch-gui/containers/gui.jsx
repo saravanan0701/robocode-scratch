@@ -39,6 +39,8 @@ import cloudManagerHOC from '../lib/cloud-manager-hoc.jsx';
 
 import GUIComponent from '../components/gui/gui.jsx';
 import {setIsScratchDesktop} from '../lib/isScratchDesktop.js';
+import Loader from '../../../components/common/loader.jsx';
+import NotFound from '../../../components/notFound/index.js';
 
 class GUI extends React.Component {
     componentDidMount () {
@@ -57,6 +59,11 @@ class GUI extends React.Component {
         }
     }
     render () {
+
+        if (this.props.notfound) {
+            return <NotFound />
+        }
+
         if (this.props.isError) {
             throw new Error(
                 `Error in Scratch GUI [location=${window.location}]: ${this.props.error}`);
@@ -84,7 +91,7 @@ class GUI extends React.Component {
         } = this.props;
         return (
             <GUIComponent
-                loading={fetchingProject || isLoading || loadingStateVisible}
+                loading={fetchingProject || isLoading || loadingStateVisible || this.props.loading}
                 {...componentProps}
             >
                 {children}

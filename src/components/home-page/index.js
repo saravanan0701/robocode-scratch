@@ -1,6 +1,7 @@
 import { Button } from "antd";
 import React, { useEffect } from "react";
 import { useSelector } from "react-redux";
+import { Capitalize } from "../../utils/constants";
 import Styles from "./main.css";
 
 export default function HomePage() {
@@ -16,7 +17,7 @@ export default function HomePage() {
 
 	return (
 		<div>
-			<div>Hi, {authData.name}</div>
+			<div>Hi, {Capitalize(authData?.name)}</div>
 
 			<Button href={process.env.REACT_APP_DASHBOARD_HOST}>Dashboard</Button>
 		</div>

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { compose } from "redux";
@@ -12,6 +12,7 @@ import GUI from "../../third-party/scratch-gui/containers/gui.jsx";
 import AppStateHOC from "../../third-party/scratch-gui/lib/app-state-hoc.jsx";
 import HashParserHOC from "../../third-party/scratch-gui/lib/hash-parser-hoc.jsx";
 import { setActivityData } from "../../third-party/scratch-gui/reducers/new/main-reducer.js";
+import Loader from "../common/loader.jsx";
 
 const WrappedGui = compose(AppStateHOC, HashParserHOC)(GUI);
 
@@ -43,6 +44,8 @@ export default function ScratchGUI() {
 	// 		console.log(JSON.stringify(vm.toJSON()).length);
 	// 	}, 2000);
 	// }, [vm]);
+	const [loading, setLoading] = useState(false);
+	const [notfound, setNotfound] = useState(false);
 
 	useEffect(() => {
 		if (!id || !search) {
@@ -62,13 +65,21 @@ export default function ScratchGUI() {
 					url += "?" + query;
 				}
 
+				setLoading(true);
 				const activityRes = await Api.doFetch("POST", url, {});
+
+				console.log(activityRes);
 
 				if (activityRes?.success) {
 					const { data } = activityRes;
 
 					dispatch(setActivityData(data));
+				} else if (!activityRes?.success && activityRes?.error_code === 1055) {
+					setNotfound(true);
+				} else {
+					setNotfound(true);
 				}
+				setLoading(false);
 			} catch (error) {
 				console.log(error);
 			}
@@ -77,5 +88,19 @@ export default function ScratchGUI() {
 		getData();
 	}, [dispatch, navigate, id, search]);
 
-	return <WrappedGui canEditTitle={false} canSave={false} onClickLogo={onClickLogo} />;
+	// if (loading) return <Loader />;
+
+	// if (notfound) {
+	// 	return <>404</>
+	// }
+
+	return (
+		<WrappedGui
+			loading = {loading}
+			notfound = {notfound}
+			canEditTitle={false} 
+			canSave={false} 
+			onClickLogo={onClickLogo} 
+		/>
+	);
 }
