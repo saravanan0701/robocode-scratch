@@ -332,3 +332,14 @@
 .hidden {
     display: none;
 }
+
+.helper_tour_header {
+    margin: 0 0 0 1rem;
+    color: white;
+    font-weight: 400;
+    font-size: 20px;
+}
+
+.helper_tour_html_container {
+    padding: 1rem 2rem;
+}

@@ -1,7 +1,7 @@
 import classNames from "classnames";
 import omit from "lodash.omit";
 import PropTypes from "prop-types";
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { defineMessages, FormattedMessage, injectIntl, intlShape } from "react-intl";
 import { connect } from "react-redux";
 import MediaQuery from "react-responsive";
@@ -292,6 +292,9 @@ const GUIComponent = (props) => {
 													isModalOpen={isModalOpen}
 													setIsModalOpen={setIsModalOpen}
 													documents={activityData?.documents?.map((d) => ({
+														_id: d?._id,
+														data: d?.data,
+														title: d?.title,
 														uri: d.url,
 														fileType: d.documentType,
 													}))}
@@ -449,12 +452,15 @@ const mapStateToProps = (state) => ({
 
 export default injectIntl(connect(mapStateToProps)(GUIComponent));
 
-const CardHeader = ({ onClose }) => (
+const CardHeader = ({ title, onClose }) => (
 	<div className={cardStyles.headerButtons}>
-		<div className={cardStyles.allButton}></div>
+		<p className={cardStyles.helper_tour_header}>
+			{title}
+		</p>
+		{/* <div className={cardStyles.allButton}></div> */}
 
 		<div className={cardStyles.headerButtonsRight}>
-			<div className={cardStyles.shrinkExpandButton}></div>
+			{/* <div className={cardStyles.shrinkExpandButton}></div> */}
 			<div className={cardStyles.removeButton} onClick={onClose}>
 				<img className={cardStyles.closeIcon} src={closeIcon} />
 				<FormattedMessage
@@ -536,9 +542,13 @@ function DocumentViewerCard({ isModalOpen = false, setIsModalOpen = () => {}, do
 				borderRadius: 8,
 				boxShadow: " 0px 0px 30px -2px rgba(0,0,0,0.49)",
 			}}
-			closable={false}>
+			closable={false}
+		>
 			<div className={cardStyles.cardModalWrapper}>
-				<CardHeader onClose={() => setIsModalOpen(false)} />
+				<CardHeader 
+					onClose={() => setIsModalOpen(false)} 
+					title = {currentDoc?.title}
+				/>
 				<div className={cardStyles.cardModalBody}>
 					<DocumentViewer currentDoc={currentDoc} />
 				</div>
@@ -570,6 +580,14 @@ function DocumentViewer({ currentDoc }) {
 	if (!currentDoc) return null;
 
 	switch (currentDoc.fileType) {
+		case "HTML":
+		case "HTML Content":
+			return (
+				<div 
+					dangerouslySetInnerHTML={{__html: currentDoc.data}} 
+					className = {cardStyles.helper_tour_html_container}
+				/>
+			);
 		case "image":
 			return (
 				<div className={cardStyles.cardImageWrapper}>
@@ -584,12 +602,14 @@ function DocumentViewer({ currentDoc }) {
 			);
 		default:
 			return (
-				<ReactDocViewer
-					documents={[currentDoc]}
-					pluginRenderers={DocViewerRenderers}
-					config={{ header: { disableHeader: true, disableFileName: true } }}
-					style={{ height: "100%" }}
-				/>
+				<div key={currentDoc?._id}>
+					<ReactDocViewer
+						documents={[currentDoc]}
+						pluginRenderers={DocViewerRenderers}
+						config={{ header: { disableHeader: true, disableFileName: true } }}
+						style={{ height: "100%" }}
+					/>
+				</div>
 			);
 	}
 }
