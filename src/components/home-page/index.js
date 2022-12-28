@@ -1,25 +1,18 @@
-import { Button } from "antd";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { useSelector } from "react-redux";
-import { Capitalize } from "../../utils/constants";
-import Styles from "./main.css";
 
 export default function HomePage() {
 	const { authData, authLoading } = useSelector((state) => state.main);
 
-	if (!authData)
-		return (
-			<div className={Styles.homePage}>
-				<div className={Styles.homePage_Button}>Please login to continue</div>
-				<Button href={process.env.REACT_APP_DASHBOARD_HOST}>Login</Button>
-			</div>
-		);
+	useEffect(() => {
+		if (!authLoading) {
+			if (authData) {
+				window.location.href = `${process.env.REACT_APP_DASHBOARD_HOST}/dashboard`;
+			} else {
+				window.location.href = `${process.env.REACT_APP_DASHBOARD_HOST}/auth/student/login`;
+			}
+		}
+	}, [authData]);
 
-	return (
-		<div>
-			<div>Hi, {Capitalize(authData?.name)}</div>
-
-			<Button href={process.env.REACT_APP_DASHBOARD_HOST}>Dashboard</Button>
-		</div>
-	);
+	return null;
 }
