@@ -1,7 +1,7 @@
 import classNames from "classnames";
 import omit from "lodash.omit";
 import PropTypes from "prop-types";
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useRef } from "react";
 import { defineMessages, FormattedMessage, injectIntl, intlShape } from "react-intl";
 import { connect } from "react-redux";
 import MediaQuery from "react-responsive";
@@ -52,6 +52,8 @@ import leftArrow from "../cards/icon--prev.svg";
 import closeIcon from "../cards/icon--close.svg";
 import debounce from "lodash.debounce";
 import ReactPlayer from "react-player";
+
+import Draggable from 'react-draggable';
 
 const messages = defineMessages({
 	addExtension: {
@@ -498,7 +500,7 @@ const NextPrevButtons = ({ onNextStep, onPrevStep }) => {
 	);
 };
 
-function DocumentViewerCard({ isModalOpen = false, setIsModalOpen = () => {}, documents = [] }) {
+function DocumentViewerCard({ isModalOpen = false, setIsModalOpen = () => { }, documents = [] }) {
 	const [documentIndex, setDocumentIndex] = useState(0);
 
 	const onBack = useMemo(
@@ -525,29 +527,106 @@ function DocumentViewerCard({ isModalOpen = false, setIsModalOpen = () => {}, do
 		return null;
 	}, [documents, documentIndex]);
 
+	const draggleRef = useRef(null);
+	const [bounds, setBounds] = useState({
+		left: 0,
+		top: 0,
+		bottom: 0,
+		right: 0,
+	});
+
+	const onStart = (_event, uiData) => {
+		const { clientWidth, clientHeight } = window.document.documentElement;
+		const targetRect = draggleRef.current?.getBoundingClientRect();
+		if (!targetRect) {
+			return;
+		}
+		setBounds({
+			left: -targetRect.left + uiData.x,
+			right: clientWidth - (targetRect.right - uiData.x),
+			top: -targetRect.top + uiData.y,
+			bottom: clientHeight - (targetRect.bottom - uiData.y),
+		});
+	};
+
+	const cardHorizontalDragOffset = 400; // ~80% of card width
+    const cardVerticalDragOffset = 0; // ~80% of card height, if expanded
+    const menuBarHeight = 48; // TODO: get pre-calculated from elsewhere?
+    const wideCardWidth = 500;
+
 	if (!isModalOpen || documents.length === 0 || currentDoc === null) return null;
+
+	console.log(bounds, draggleRef.current?.style?.cssText, "saran")
+
+	return (
+		<div
+            className={cardStyles.cardContainerOverlay}
+            style={{
+                // width: `${window.innerWidth + (2 * cardHorizontalDragOffset)}px`,
+                // height: `${window.innerHeight - menuBarHeight + cardVerticalDragOffset}px`,
+                // top: `${menuBarHeight}px`,
+                // left: `${-cardHorizontalDragOffset}px`
+				left: "35%",
+				top: "20%"
+            }}
+        >
+			<Draggable
+				bounds={bounds}
+				onStart={(event, uiData) => onStart(event, uiData)}
+			>
+				<div ref={draggleRef}>
+					<div className={cardStyles.cardContainer}>
+						<div className={cardStyles.card}>
+							<CardHeader
+								onClose={() => setIsModalOpen(false)}
+								title={currentDoc?.title}
+							/>
+							<div className={cardStyles.stepBody} >
+								<DocumentViewer currentDoc={currentDoc} />
+							</div>
+							<NextPrevButtons
+								onPrevStep={documentIndex > 0 ? onBack : null}
+								onNextStep={documentIndex < documents.length - 1 ? onNext : null}
+							/>
+						</div>
+					</div>
+				</div>
+			</Draggable>
+		</div>
+	)
 
 	return (
 		<Modal
 			centered
-			width="70vw"
+			width="40vw"
 			open={isModalOpen}
-			onCancel={() => setIsModalOpen(false)}
+			// onCancel={() => setIsModalOpen(false)}
+			// destroyOnClose={true}
 			footer={null}
-			destroyOnClose={true}
 			className="ant-modal-documents"
 			bodyStyle={{
 				margin: "-20px -24px",
 				overflow: "hidden",
 				borderRadius: 8,
 				boxShadow: " 0px 0px 30px -2px rgba(0,0,0,0.49)",
+				height: "400px"
 			}}
 			closable={false}
+			mask={false}
+			modal={false}
+			modalRender={(modal) => (
+				<Draggable
+					bounds={bounds}
+					onStart={(event, uiData) => onStart(event, uiData)}
+				>
+					<div ref={draggleRef}>{modal}</div>
+				</Draggable>
+			)}
 		>
 			<div className={cardStyles.cardModalWrapper}>
-				<CardHeader 
-					onClose={() => setIsModalOpen(false)} 
-					title = {currentDoc?.title}
+				<CardHeader
+					onClose={() => setIsModalOpen(false)}
+					title={currentDoc?.title}
 				/>
 				<div className={cardStyles.cardModalBody}>
 					<DocumentViewer currentDoc={currentDoc} />
@@ -576,16 +655,16 @@ const reactPlayerConfig = {
 	},
 };
 
-function DocumentViewer({ currentDoc }) {
+const DocumentViewer = React.memo(({ currentDoc }) => {
 	if (!currentDoc) return null;
 
 	switch (currentDoc.fileType) {
 		case "HTML":
 		case "HTML Content":
 			return (
-				<div 
-					dangerouslySetInnerHTML={{__html: currentDoc.data}} 
-					className = {cardStyles.helper_tour_html_container}
+				<div
+					dangerouslySetInnerHTML={{ __html: currentDoc.data }}
+					className={cardStyles.helper_tour_html_container}
 				/>
 			);
 		case "image":
@@ -612,4 +691,4 @@ function DocumentViewer({ currentDoc }) {
 				</div>
 			);
 	}
-}
+})

@@ -36,14 +36,6 @@
     object-fit: contain;
 }
 
-.card-container {
-    position:absolute;
-    pointer-events: auto;
-    z-index: $z-index-card;
-    margin: 0.5rem 2rem;
-    min-width: 468px;
-}
-
 .left-card, .right-card {
     height: 90%;
     position: absolute;
@@ -115,19 +107,6 @@
     right: -27px;
 }
 
-.card {
-    border: 1px solid $ui-tertiary;
-    border-radius: 0.75rem;
-    display: flex;
-    flex-direction: column;
-    cursor: move;
-    z-index: 20;
-    overflow: hidden;
-    box-shadow: 0px 5px 25px 5px $ui-black-transparent;
-    align-items: center;
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-}
-
 .header-buttons {
     width: 100%;
     display: flex;
@@ -138,6 +117,7 @@
     border-bottom: 1px solid $extensions-tertiary;
     font-size: 0.625rem;
     font-weight: bold;
+    cursor: move;
 }
 
 .header-buttons-hidden {
@@ -187,20 +167,6 @@
     text-align: center;
     font-weight: bold;
     color: $text-primary;
-}
-
-.step-body {
-    width: 100%;
-    background: $ui-white;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    position: relative;
-    text-align: center;
-
-    /* Min height prevents layout changing when images change */
-    min-height: 256px;
 }
 
 .step-video {
@@ -342,4 +308,50 @@
 
 .helper_tour_html_container {
     padding: 1rem 2rem;
+}
+
+.card-container-overlay {
+    position: fixed;
+    pointer-events: none;
+    z-index: $z-index-card;
+}
+
+.card-container {
+    position:absolute;
+    pointer-events: auto;
+    z-index: $z-index-card;
+    min-width: 560px;
+}
+
+.card {
+    border: 1px solid $ui-tertiary;
+    border-radius: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    cursor: move;
+    z-index: 20;
+    overflow: hidden;
+    box-shadow: 0px 5px 25px 5px $ui-black-transparent;
+    align-items: center;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+
+    /* max-width: 468px;
+    max-height: 400px; */
+    /* max-width: 520px; */
+}
+
+.step-body {
+    width: 100%;
+    background: $ui-white;
+    /* display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center; */
+    position: relative;
+    text-align: center;
+    overflow: scroll;
+
+    max-height: 350px;
+    min-height: 350px;
+    max-width: 560px;
 }
