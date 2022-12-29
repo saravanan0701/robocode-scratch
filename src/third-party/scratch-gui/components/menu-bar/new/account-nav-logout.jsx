@@ -12,19 +12,15 @@ export default function AccountNavLogout() {
 
 		localStorage.removeItem(TOKEN_NAME);
 
-		const windowPortal = window.open(process.env.REACT_APP_DASHBOARD_HOST, "noopener noreferrer", );
+		location.href = `${process.env.REACT_APP_DASHBOARD_HOST}/logout`;
 
-		const messageData = JSON.stringify({
-			eventName: "LOGOUT_FROM_SCRATCH",
-		});
+		// const messageData = JSON.stringify({
+		// 	eventName: "LOGOUT_FROM_SCRATCH",
+		// });
 
-		setTimeout(() => {
-			windowPortal.postMessage(messageData, process.env.REACT_APP_DASHBOARD_HOST);
-		}, 50);
-
-		setTimeout(() => {
-			location.href = "/";
-		}, 50);
+		// setTimeout(() => {
+		// 	windowPortal.postMessage(messageData, process.env.REACT_APP_DASHBOARD_HOST);
+		// }, 150);
 	};
 
 	return <div onClick={handleLogoutClick}>Logout</div>;

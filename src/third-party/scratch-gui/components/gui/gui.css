@@ -3,7 +3,7 @@
 @import "../../css/z-index.css";
 
 .page-wrapper {
-    height: 100%;
+    height: 100vh;
 }
 
 .body-wrapper {

@@ -83,6 +83,7 @@ import api from "../../../../common/api.js";
 import apiUrls from "../../../../common/apiUrls.js";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import Swal from "sweetalert2";
 
 const ariaMessages = defineMessages({
 	language: {
@@ -249,21 +250,45 @@ class MenuBar extends React.Component {
 					toast.warning("There was a problem saving the activity");
 				}
 			} else {
-				const saveActivityRes = await api.doFetch("POST", `${apiUrls.SAVE_NEW_ACTIVITY}/${studentActivity._id}`, body);
+				Swal.fire({
+					title: "Are you sure?",
+					text: "A new file will be created",
+					allowEscapeKey: false,
+					allowEnterKey: false,
+					allowOutsideClick: false,
+					showCancelButton: true,
+					showConfirmButton: true,
+					confirmButtonText: "Yes",
+					cancelButtonText: "No",
+					cancelButtonColor: "#EC5959",
+					confirmButtonColor: "hsla(215, 100%, 65%, 1)",
+				}).then(async ({ isConfirmed }) => {
+					if (isConfirmed) {
+						const saveActivityRes = await api.doFetch(
+							"POST",
+							`${apiUrls.SAVE_NEW_ACTIVITY}/${studentActivity._id}`,
+							body
+						);
 
-				if (saveActivityRes?.success) {
-					const data = saveActivityRes.data?.studentActivity;
+						if (saveActivityRes?.success) {
+							const data = saveActivityRes.data?.studentActivity;
 
-					if (!data) return;
+							if (!data) return;
 
-					const urlData = { activityType: "scratch", id: data._id };
-					const searchString = qs.stringify(urlData);
-					const url = `/${data.activityId}?${searchString}`;
+							const urlData = { activityType: "scratch", id: data._id };
+							const searchString = qs.stringify(urlData);
+							const url = `/${data.activityId}?${searchString}`;
 
-					location.href = url;
-				} else {
-					toast.warning("There was a problem saving the activity");
-				}
+							location.href = url;
+						} else {
+							toast.warning("There was a problem saving the activity");
+						}
+
+						return;
+					}
+
+					this.setState({ name: defaultName });
+				});
 			}
 		} catch (error) {
 			toast.warning("There was a problem saving the activity");
