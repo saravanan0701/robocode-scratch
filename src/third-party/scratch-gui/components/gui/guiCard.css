@@ -49,6 +49,7 @@
 }
 
 .left-card {
+    display: none;
     left: -.75rem;
     border-right: 0;
     border-top-left-radius: 0.75rem;
@@ -56,6 +57,7 @@
 }
 
 .right-card {
+    display: none;
     right: -.75rem;
     border-left: 0;
     border-top-right-radius: 0.75rem;
@@ -100,11 +102,13 @@
 }
 
 .left-button {
-    left: -27px;
+    /* left: -27px; */
+    left: -20px;
 }
 
 .right-button {
-    right: -27px;
+    /* right: -27px; */
+    right: -20px;
 }
 
 .header-buttons {

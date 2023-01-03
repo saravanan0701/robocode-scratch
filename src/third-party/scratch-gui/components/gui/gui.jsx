@@ -1,7 +1,7 @@
 import classNames from "classnames";
 import omit from "lodash.omit";
 import PropTypes from "prop-types";
-import React, { useState, useMemo, useRef } from "react";
+import React, { useState, useMemo, useRef, useEffect } from "react";
 import { defineMessages, FormattedMessage, injectIntl, intlShape } from "react-intl";
 import { connect } from "react-redux";
 import MediaQuery from "react-responsive";
@@ -160,6 +160,12 @@ const GUIComponent = (props) => {
 	if (isRendererSupported === null) {
 		isRendererSupported = Renderer.isSupported();
 	}
+
+	useEffect(() => {
+		if (activityData?.documents && activityData?.documents.length > 0 && !isModalOpen) {
+			setIsModalOpen(true);
+		}
+	}, [activityData])
 
 	return (
 		<MediaQuery minWidth={layout.fullSizeMinWidth}>
@@ -556,8 +562,6 @@ function DocumentViewerCard({ isModalOpen = false, setIsModalOpen = () => { }, d
 
 	if (!isModalOpen || documents.length === 0 || currentDoc === null) return null;
 
-	console.log(bounds, draggleRef.current?.style?.cssText, "saran")
-
 	return (
 		<div
             className={cardStyles.cardContainerOverlay}
@@ -655,7 +659,15 @@ const reactPlayerConfig = {
 	},
 };
 
+function areEqual(prevProps, nextProps) {
+	if (prevProps?.currentDoc?._id === nextProps?.currentDoc?._id) {
+		return true;		
+	}
+	return false;
+}
+
 const DocumentViewer = React.memo(({ currentDoc }) => {
+
 	if (!currentDoc) return null;
 
 	switch (currentDoc.fileType) {
@@ -691,4 +703,4 @@ const DocumentViewer = React.memo(({ currentDoc }) => {
 				</div>
 			);
 	}
-})
+}, areEqual)
