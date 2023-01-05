@@ -19,6 +19,7 @@ import { setAuthData } from "./third-party/scratch-gui/reducers/new/main-reducer
 import HomePage from "./components/home-page";
 import Loader from "./components/common/loader.jsx";
 import { ToastContainer } from "react-toastify";
+import Logout from "./components/logout";
 
 const ScratchGUI = React.lazy(() => import("./components/scratch-gui"));
 const appTarget = document.getElementById("root");
@@ -31,17 +32,19 @@ const root = ReactDOM.createRoot(appTarget);
 const App = () => {
 	useEffect(() => {
 		const handleMessageEvent = (ev) => {
-			if (ev.origin === process.env.REACT_APP_DASHBOARD_HOST) {
-				const data = ev.data ? JSON.parse(ev.data) : null;
+			try {
+				if (ev.origin === process.env.REACT_APP_DASHBOARD_HOST) {
+					const data = ev.data ? JSON.parse(ev.data) : null;
 
-				if (data) {
-					if (data.eventName === "SCRATCH_LOGOUT") {
-						localStorage.removeItem(TOKEN_NAME);
+					if (data) {
+						if (data.eventName === "SCRATCH_LOGOUT") {
+							localStorage.removeItem(TOKEN_NAME);
 
-						window.close();
+							window.close();
+						}
 					}
 				}
-			}
+			} catch (error) {}
 		};
 
 		const handleStorageEvent = (event) => {
@@ -72,7 +75,7 @@ const App = () => {
 
 	return (
 		<React.Fragment>
-			<Suspense fallback={<div>Loading ...</div>}>
+			<Suspense fallback={<Loader />}>
 				<Provider store={store}>
 					<InnerApp />
 				</Provider>
@@ -118,6 +121,7 @@ function InnerApp() {
 				<Route path="/" element={<HomePage />} />
 				<Route path="/redirect" element={<CodeRedirect />} />
 				<Route path="/notfound" element={<NotFound />} />
+				<Route path="/logout" element={<Logout />} />
 				<Route path="/:id" element={<ScratchGUI />} />
 				<Route path="*" element={<NotFound />} />
 			</Routes>

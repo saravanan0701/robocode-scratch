@@ -9,6 +9,7 @@ import apiUrls from "../../common/apiUrls";
 import store from "../../third-party/scratch-gui/lib/new/store";
 import { setAuthData } from "../../third-party/scratch-gui/reducers/new/main-reducer";
 import { TOKEN_NAME } from "../../utils";
+import Loader from "../common/loader.jsx";
 
 export default function CodeRedirect() {
 	const [loading, setLoading] = useState(true);
@@ -100,7 +101,7 @@ export default function CodeRedirect() {
 		if (subscribed.current) navigate("/");
 	}, [navigate, dispatch, searchParams]);
 
-	if (loading) return <>Loading ...</>;
+	if (loading) return <Loader />;
 
 	return null;
 }

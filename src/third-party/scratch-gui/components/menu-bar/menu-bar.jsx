@@ -84,6 +84,7 @@ import apiUrls from "../../../../common/apiUrls.js";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
+import { setProjectUnchanged } from "../../reducers/project-changed.js";
 
 const ariaMessages = defineMessages({
 	language: {
@@ -246,6 +247,8 @@ class MenuBar extends React.Component {
 
 				if (saveActivityRes?.success) {
 					toast.success("Saved successfully");
+
+					this.props.saveProjectChanges();
 				} else {
 					toast.warning("There was a problem saving the activity");
 				}
@@ -993,6 +996,7 @@ const mapDispatchToProps = (dispatch) => ({
 	onClickSave: () => dispatch(manualUpdateProject()),
 	onClickSaveAsCopy: () => dispatch(saveProjectAsCopy()),
 	onSeeCommunity: () => dispatch(setPlayer(true)),
+	saveProjectChanges: () => dispatch(setProjectUnchanged()),
 });
 
 export default compose(injectIntl, MenuBarHOC, connect(mapStateToProps, mapDispatchToProps))(MenuBar);
