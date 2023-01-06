@@ -23,110 +23,130 @@ import Logout from "./components/logout";
 
 const ScratchGUI = React.lazy(() => import("./components/scratch-gui"));
 const appTarget = document.getElementById("root");
-appTarget.className = styles.app;
 
-document.body.appendChild(appTarget);
+if (appTarget) {
+	appTarget.className = styles.app;
 
-const root = ReactDOM.createRoot(appTarget);
+	document.body.appendChild(appTarget);
 
-const App = () => {
-	useEffect(() => {
-		const handleMessageEvent = (ev) => {
-			try {
-				if (ev.origin === process.env.REACT_APP_DASHBOARD_HOST) {
-					const data = ev.data ? JSON.parse(ev.data) : null;
+	const root = ReactDOM.createRoot(appTarget);
 
-					if (data) {
-						if (data.eventName === "SCRATCH_LOGOUT") {
-							localStorage.removeItem(TOKEN_NAME);
+	const App = () => {
+		useEffect(() => {
+			const unmountLoadingDiv = () => {
+				document.body.style.overflow = "auto";
 
-							window.close();
+				const loadingRoot = document.getElementById("loading-root");
+				const logoutScript = document.getElementById("logout-script");
+
+				if (loadingRoot) {
+					document.body.removeChild(loadingRoot);
+				}
+
+				if (logoutScript) {
+					document.head.removeChild(logoutScript);
+				}
+			};
+
+			const handleMessageEvent = (ev) => {
+				try {
+					if (ev.origin === process.env.REACT_APP_DASHBOARD_HOST) {
+						const data = ev.data ? JSON.parse(ev.data) : null;
+
+						if (data) {
+							if (data.eventName === "SCRATCH_LOGOUT") {
+								localStorage.removeItem(TOKEN_NAME);
+
+								window.close();
+							}
 						}
 					}
+				} catch (error) {}
+			};
+
+			const handleStorageEvent = (event) => {
+				if (!event) return;
+
+				let authChange = false;
+
+				if (event.key === "userdetail") {
+					authChange = true;
+				} else if (event.key === null && event.newValue === null) {
+					authChange = true;
 				}
-			} catch (error) {}
-		};
 
-		const handleStorageEvent = (event) => {
-			if (!event) return;
+				if (authChange) {
+					window.location.href = "/";
+				}
+			};
 
-			let authChange = false;
+			unmountLoadingDiv();
 
-			if (event.key === "userdetail") {
-				authChange = true;
-			} else if (event.key === null && event.newValue === null) {
-				authChange = true;
-			}
+			window.onstorage = handleStorageEvent;
 
-			if (authChange) {
-				window.location.href = "/";
-			}
-		};
+			window.addEventListener("message", handleMessageEvent);
 
-		window.onstorage = handleStorageEvent;
+			return () => {
+				window.removeEventListener("message", handleMessageEvent);
+				window.onstorage = null;
+			};
+		}, []);
 
-		window.addEventListener("message", handleMessageEvent);
+		return (
+			<React.Fragment>
+				<Suspense fallback={<Loader />}>
+					<Provider store={store}>
+						<InnerApp />
+					</Provider>
+				</Suspense>
 
-		return () => {
-			window.removeEventListener("message", handleMessageEvent);
-			window.onstorage = null;
-		};
-	}, []);
+				<ToastContainer autoClose={3000} position="top-center" theme="colored" />
+			</React.Fragment>
+		);
+	};
 
-	return (
-		<React.Fragment>
-			<Suspense fallback={<Loader />}>
-				<Provider store={store}>
-					<InnerApp />
-				</Provider>
-			</Suspense>
+	function InnerApp() {
+		const [loading, setLoading] = useState(true);
+		const dispatch = useDispatch();
 
-			<ToastContainer autoClose={3000} position="top-center" theme="colored" />
-		</React.Fragment>
-	);
-};
+		useEffect(() => {
+			const getData = async () => {
+				try {
+					setLoading(true);
 
-function InnerApp() {
-	const [loading, setLoading] = useState(true);
-	const dispatch = useDispatch();
+					const token = localStorage.getItem(TOKEN_NAME);
 
-	useEffect(() => {
-		const getData = async () => {
-			try {
-				setLoading(true);
+					if (token) {
+						const profileRes = await api.doFetch("GET", `${apiUrls.STUDENT_PROFILE}`);
 
-				const token = localStorage.getItem(TOKEN_NAME);
-
-				if (token) {
-					const profileRes = await api.doFetch("GET", `${apiUrls.STUDENT_PROFILE}`);
-
-					if (profileRes.success) {
-						dispatch(setAuthData(profileRes.data));
+						if (profileRes.success) {
+							dispatch(setAuthData(profileRes.data));
+						}
 					}
+				} catch (error) {
+				} finally {
+					setLoading(false);
 				}
-			} catch (error) {
-			} finally {
-				setLoading(false);
-			}
-		};
+			};
 
-		getData();
-	}, [dispatch]);
+			getData();
+		}, [dispatch]);
 
-	if (loading) return <Loader />;
+		if (loading) return <Loader />;
 
-	return (
-		<BrowserRouter>
-			<Routes>
-				<Route path="/" element={<HomePage />} />
-				<Route path="/redirect" element={<CodeRedirect />} />
-				<Route path="/notfound" element={<NotFound />} />
-				<Route path="/logout" element={<Logout />} />
-				<Route path="/:id" element={<ScratchGUI />} />
-				<Route path="*" element={<NotFound />} />
-			</Routes>
-		</BrowserRouter>
-	);
+		return (
+			<BrowserRouter>
+				<Routes>
+					<Route path="/" element={<HomePage />} />
+					<Route path="/redirect" element={<CodeRedirect />} />
+					<Route path="/notfound" element={<NotFound />} />
+					<Route path="/logout" element={<Logout />} />
+					<Route path="/:id" element={<ScratchGUI />} />
+					<Route path="*" element={<NotFound />} />
+				</Routes>
+			</BrowserRouter>
+		);
+	}
+
+	root.render(<App />);
 }
-
-root.render(<App />);

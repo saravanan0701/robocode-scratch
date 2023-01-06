@@ -68,8 +68,6 @@ export default function ScratchGUI() {
 				setLoading(true);
 				const activityRes = await Api.doFetch("POST", url, {});
 
-				console.log(activityRes);
-
 				if (activityRes?.success) {
 					const { data } = activityRes;
 

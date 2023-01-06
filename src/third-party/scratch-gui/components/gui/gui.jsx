@@ -482,7 +482,6 @@ const CardHeader = ({ title, onClose }) => (
 );
 
 const NextPrevButtons = ({ onNextStep, onPrevStep }) => {
-	console.log(JSON.stringify({ onNextStep, onPrevStep }));
 	return (
 		<React.Fragment>
 			{onNextStep ? (

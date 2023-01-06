@@ -11,12 +11,60 @@
 		<link rel="apple-touch-icon" href="/logo192.png" />
 
 		<title>Robo-en-code</title>
+
+		<script id="logout-script">
+			if (window.location && window.location.pathname.includes("/logout")) {
+				localStorage.removeItem("robo-en-code-token");
+
+				window.location.href = "<%= htmlWebpackPlugin.options.dashboardHost %>/logout?fromScratch=1";
+			}
+		</script>
+
 		<!-- Styles -->
-		<link rel="stylesheet" href="/static/ReactToastify.min.css">
-		<link rel="stylesheet" href="/static/index.css">
+		<style>
+			body {
+				overflow: hidden;
+			}
+			#loading-root {
+				height: 100vh;
+				width: 100vw;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+			}
+			#loading-root .lds-dual-ring {
+				display: inline-block;
+				width: 60px;
+				height: 60px;
+			}
+			#loading-root .lds-dual-ring:after {
+				content: "";
+				display: block;
+				width: 48px;
+				height: 48px;
+				margin: 8px;
+				border-radius: 50%;
+				border: 4px solid rgb(77, 151, 255);
+				border-color: rgb(77, 151, 255) transparent rgb(77, 151, 255) transparent;
+				animation: lds-dual-ring 1.2s linear infinite;
+			}
+			@keyframes lds-dual-ring {
+				0% {
+					transform: rotate(0deg);
+				}
+				100% {
+					transform: rotate(360deg);
+				}
+			}
+		</style>
+		<link rel="stylesheet" href="/static/ReactToastify.min.css" />
+		<link rel="stylesheet" href="/static/index.css" />
 		<!-- Styles -->
 	</head>
 	<body>
 		<div id="root"></div>
+		<div id="loading-root">
+			<div class="lds-dual-ring"></div>
+		</div>
 	</body>
 </html>

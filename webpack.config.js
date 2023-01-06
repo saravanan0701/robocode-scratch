@@ -192,6 +192,8 @@ module.exports = [
 			new HtmlWebpackPlugin({
 				chunks: ["lib.min", "gui"],
 				template: "./src/index.ejs",
+				inject: "body",
+				dashboardHost: process.env.REACT_APP_DASHBOARD_HOST,
 			}),
 			new CopyWebpackPlugin({
 				patterns: [
