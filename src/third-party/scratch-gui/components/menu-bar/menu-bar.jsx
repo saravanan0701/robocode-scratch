@@ -280,7 +280,7 @@ class MenuBar extends React.Component {
 
 							const urlData = { activityType: "scratch", id: data._id };
 							const searchString = qs.stringify(urlData);
-							const url = `/${data.activityId}?${searchString}`;
+							const url = `/${studentActivity?.classroomId}/${data.activityId}?${searchString}`;
 
 							location.href = url;
 						} else {
@@ -327,7 +327,7 @@ class MenuBar extends React.Component {
 
 				const searchString = qs.stringify(urlData);
 
-				const url = `/${data.activityId}?${searchString}`;
+				const url = `/${studentActivity?.classroomId}/${data.activityId}?${searchString}`;
 
 				location.href = url;
 			}
@@ -1083,7 +1083,7 @@ function SaveInput({ handleSave }) {
 
 				const searchString = qs.stringify(urlData);
 
-				const url = `/${data.activityId}?${searchString}`;
+				const url = `/${studentActivity?.classroomId}/${data.activityId}?${searchString}`;
 
 				location.href = url;
 			}

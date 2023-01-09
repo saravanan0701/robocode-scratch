@@ -57,12 +57,13 @@ export default function CodeRedirect() {
 								}
 							}
 
-							const { redirectId, redirectType, redirectData } = data;
+							const { redirectId, redirectType, redirectData, classroomId } = data;
 
 							return {
 								redirectId,
 								redirectType,
 								redirectData,
+								classroomId
 							};
 						}
 						return null;
@@ -75,7 +76,7 @@ export default function CodeRedirect() {
 				getActivityData().then((activityData) => {
 					if (subscribed.current) {
 						if (activityData?.redirectId) {
-							const { redirectData } = activityData;
+							const { redirectData, classroomId } = activityData;
 
 							if (redirectData) {
 								const { type, activity_type: activityType, id } = redirectData;
@@ -87,7 +88,8 @@ export default function CodeRedirect() {
 
 								const searchString = qs.stringify(data);
 
-								return navigate(`/${activityData.redirectId}?${searchString}`, { replace: true });
+								// return navigate(`${classroomId}/${activityData.redirectId}?${searchString}`, { replace: true });
+								return navigate(`/${classroomId}/${activityData.redirectId}?${searchString}`, { replace: true });
 							}
 						}
 						navigate("/");

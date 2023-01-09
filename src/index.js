@@ -141,7 +141,7 @@ if (appTarget) {
 					<Route path="/redirect" element={<CodeRedirect />} />
 					<Route path="/notfound" element={<NotFound />} />
 					<Route path="/logout" element={<Logout />} />
-					<Route path="/:id" element={<ScratchGUI />} />
+					<Route path="/:classroomId/:id" element={<ScratchGUI />} />
 					<Route path="*" element={<NotFound />} />
 				</Routes>
 			</BrowserRouter>

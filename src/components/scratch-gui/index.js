@@ -21,7 +21,7 @@ const onClickLogo = () => {
 };
 
 export default function ScratchGUI() {
-	const { id } = useParams();
+	const { classroomId, id } = useParams();
 	const { search } = useLocation();
 	const navigate = useNavigate();
 
@@ -59,7 +59,7 @@ export default function ScratchGUI() {
 
 				const query = queryString.stringify(searchData);
 
-				let url = `${apiUrls.LOAD_ACTIVITY}/${id}`;
+				let url = `${apiUrls.LOAD_ACTIVITY}/${classroomId}/${id}`;
 
 				if (query) {
 					url += "?" + query;
