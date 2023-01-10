@@ -312,6 +312,7 @@
 
 .helper_tour_html_container {
     /* padding: 1rem 2rem; */
+    height: 350px;
 }
 
 .card-container-overlay {
