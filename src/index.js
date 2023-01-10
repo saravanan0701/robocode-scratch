@@ -20,11 +20,20 @@ import HomePage from "./components/home-page";
 import Loader from "./components/common/loader.jsx";
 import { ToastContainer } from "react-toastify";
 import Logout from "./components/logout";
+// import ReactGA from "react-ga4";
+
 
 const ScratchGUI = React.lazy(() => import("./components/scratch-gui"));
 const appTarget = document.getElementById("root");
 
 if (appTarget) {
+
+	// if (process.env.REACT_APP_ENV !== 'PROD') {
+	// 	alert("GHellooo");
+	// 	ReactGA.initialize(process.env.REACT_APP_GOOGLE_ANALYTICS);
+	// 	ReactGA.send("pageview");
+	// }
+
 	appTarget.className = styles.app;
 
 	document.body.appendChild(appTarget);
