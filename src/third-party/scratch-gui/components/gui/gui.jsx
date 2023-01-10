@@ -692,7 +692,10 @@ const DocumentViewer = React.memo(({ currentDoc }) => {
 			);
 		default:
 			return (
-				<div key={currentDoc?._id}>
+				<div 
+					key={currentDoc?._id}
+					style={{ height: "350px" }}
+				>
 					<ReactDocViewer
 						documents={[currentDoc]}
 						pluginRenderers={DocViewerRenderers}
