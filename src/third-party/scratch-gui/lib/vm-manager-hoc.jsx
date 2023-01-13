@@ -50,7 +50,11 @@ const vmManagerHOC = function (WrappedComponent) {
 							loaded = true;
 						}
 					} else if (studentActivity && studentActivity.activityData) {
-						data = studentActivity.activityData;
+						// data = studentActivity.activityData;
+						const fileRes = await axios.get(`${studentActivity.activityData}`, { responseType: "arraybuffer" });
+						data = fileRes.data;
+
+						loaded = true;
 					}
 
 					if (data) {

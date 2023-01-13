@@ -9,6 +9,7 @@ const apiUrls = {
 	SAVE_ACTIVITY: `${API_URL}activity/student/save`,
 	SAVE_NEW_ACTIVITY: `${API_URL}activity/student/save-new`,
 	STUDENT_PROFILE: `${API_URL}student/profile`,
+	UPLOAD_FILE: `${API_URL}upload/documents`,
 };
 
 export default apiUrls;

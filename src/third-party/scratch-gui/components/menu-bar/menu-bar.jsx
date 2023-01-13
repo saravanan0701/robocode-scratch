@@ -180,6 +180,7 @@ class MenuBar extends React.Component {
 			defaultName: "",
 			newName: "",
 			open: false,
+			loading: false
 		};
 	}
 
@@ -226,16 +227,45 @@ class MenuBar extends React.Component {
 
 		if (!studentActivity || !studentActivity._id) return;
 
-		let { name, defaultName } = this.state;
+		let { name, defaultName, loading } = this.state;
+
+		if (loading) return;
+		
 		name = name.trim();
 
 		const body = {
 			name: this.state.name,
 		};
 
-		try {
-			body.activityData = this.props.vm.toJSON();
-		} catch (error) {}
+		// try {
+		// 	body.activityData = this.props.vm.toJSON();
+		// } catch (error) {}
+
+		this.setState({
+			loading: true
+		})
+
+		let activityData = await this.props.saveProjectSb3()
+		
+		const fileName = `${this.state.name}.sb3`;
+
+		let formdata = new FormData();
+
+		formdata.append("files", new File([activityData], fileName, { lastModified: new Date().getTime(), type: activityData.type }));
+
+		const data = await api.doFetch(
+			"PUT",
+			apiUrls.UPLOAD_FILE,
+			formdata,
+		);
+
+		if (!data?.success) {
+			this.setState({
+				loading: false
+			})
+			Swal.fire("Error!", data?.message || "Internal server Error", "error");
+		}
+		body.activityData =  data?.data?.files[0];
 
 		try {
 			if (defaultName === name) {
@@ -252,6 +282,7 @@ class MenuBar extends React.Component {
 				} else {
 					toast.warning("There was a problem saving the activity");
 				}
+				this.setState({ loading: false });
 			} else {
 				Swal.fire({
 					title: "Are you sure?",
@@ -287,13 +318,15 @@ class MenuBar extends React.Component {
 							toast.warning("There was a problem saving the activity");
 						}
 
+						this.setState({ loading: false });
 						return;
 					}
 
-					this.setState({ name: defaultName });
+					this.setState({ name: defaultName, loading: false });
 				});
 			}
 		} catch (error) {
+			this.setState({ loading: false });
 			toast.warning("There was a problem saving the activity");
 		}
 	}
@@ -660,7 +693,10 @@ class MenuBar extends React.Component {
 							onChange={this.handleChangeName}
 						/>
 
-						<AntButton onClick={this.handleSave}>Save</AntButton>
+						<AntButton 
+							onClick={this.handleSave}
+							loading={this.state.loading}
+						>Save</AntButton>
 					</Space>
 
 					{this.props.canEditTitle ? (
@@ -973,6 +1009,7 @@ const mapStateToProps = (state, ownProps) => {
 		userOwnsProject: ownProps.authorUsername && user && ownProps.authorUsername === user.username,
 		vm: state.scratchGui.vm,
 		activityData: state.main.activityData,
+		saveProjectSb3: state.scratchGui.vm.saveProjectSb3.bind(state.scratchGui.vm)
 	};
 };
 
