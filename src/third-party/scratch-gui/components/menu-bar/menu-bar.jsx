@@ -223,11 +223,39 @@ class MenuBar extends React.Component {
 	}
 
 	async handleSave() {
+
 		const { studentActivity } = this.props.activityData || {};
 
 		if (!studentActivity || !studentActivity._id) return;
 
 		let { name, defaultName, loading } = this.state;
+
+		let newProject = false, saveNewProject = false;
+
+		if (defaultName.trim() !== name.trim()) {
+			newProject = true;
+		}
+
+		if (newProject) {
+			const { isConfirmed } = await Swal.fire({
+				title: "Are you sure?",
+				text: "A new file will be created",
+				allowEscapeKey: false,
+				allowEnterKey: false,
+				allowOutsideClick: false,
+				showCancelButton: true,
+				showConfirmButton: true,
+				confirmButtonText: "Yes",
+				cancelButtonText: "No",
+				cancelButtonColor: "#EC5959",
+				confirmButtonColor: "hsla(215, 100%, 65%, 1)",
+			});
+
+			if (!isConfirmed) {
+				this.setState({ name: defaultName, loading: false });
+				return;
+			}
+		}
 
 		if (loading) return;
 		
@@ -268,7 +296,7 @@ class MenuBar extends React.Component {
 		body.activityData =  data?.data?.files[0];
 
 		try {
-			if (defaultName === name) {
+			if (!newProject) {
 				const saveActivityRes = await api.doFetch(
 					"POST",
 					`${apiUrls.SAVE_ACTIVITY}/${studentActivity._id}?activityType=scratch`,
@@ -284,46 +312,27 @@ class MenuBar extends React.Component {
 				}
 				this.setState({ loading: false });
 			} else {
-				Swal.fire({
-					title: "Are you sure?",
-					text: "A new file will be created",
-					allowEscapeKey: false,
-					allowEnterKey: false,
-					allowOutsideClick: false,
-					showCancelButton: true,
-					showConfirmButton: true,
-					confirmButtonText: "Yes",
-					cancelButtonText: "No",
-					cancelButtonColor: "#EC5959",
-					confirmButtonColor: "hsla(215, 100%, 65%, 1)",
-				}).then(async ({ isConfirmed }) => {
-					if (isConfirmed) {
-						const saveActivityRes = await api.doFetch(
-							"POST",
-							`${apiUrls.SAVE_NEW_ACTIVITY}/${studentActivity._id}`,
-							body
-						);
+				const saveActivityRes = await api.doFetch(
+					"POST",
+					`${apiUrls.SAVE_NEW_ACTIVITY}/${studentActivity._id}`,
+					body
+				);
 
-						if (saveActivityRes?.success) {
-							const data = saveActivityRes.data?.studentActivity;
+				if (saveActivityRes?.success) {
+					const data = saveActivityRes.data?.studentActivity;
 
-							if (!data) return;
+					if (!data) return;
 
-							const urlData = { activityType: "scratch", id: data._id };
-							const searchString = qs.stringify(urlData);
-							const url = `/${studentActivity?.classroomId}/${data.activityId}?${searchString}`;
+					const urlData = { activityType: "scratch", id: data._id };
+					const searchString = qs.stringify(urlData);
+					const url = `/${studentActivity?.classroomId}/${data.activityId}?${searchString}`;
 
-							location.href = url;
-						} else {
-							toast.warning("There was a problem saving the activity");
-						}
+					location.href = url;
+				} else {
+					toast.warning("There was a problem saving the activity");
+				}
 
-						this.setState({ loading: false });
-						return;
-					}
-
-					this.setState({ name: defaultName, loading: false });
-				});
+				this.setState({ loading: false });
 			}
 		} catch (error) {
 			this.setState({ loading: false });
