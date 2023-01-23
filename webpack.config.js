@@ -59,6 +59,9 @@ const base = {
 		historyApiFallback: {
 			index: "/",
 			disableDotRule: true,
+		},
+		headers: {
+			'X-Frame-Options': 'sameorigin'
 		}
 	},
 	output: {
