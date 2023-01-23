@@ -71,7 +71,6 @@ function API() {
 
 	const logout = () => {
 		localStorage.removeItem(TOKEN_NAME);
-		window.location.href = `${process.env.REACT_APP_DASHBOARD_HOST}/logout?fromScratch=1`;
 	};
 
 	return {

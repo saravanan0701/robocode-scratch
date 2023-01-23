@@ -11,6 +11,7 @@ export default function AccountNavLogout() {
 		dispatch(resetActivityData());
 
 		api.logout();
+		window.location.href = `${process.env.REACT_APP_DASHBOARD_HOST}/logout`
 	};
 
 	return <div onClick={handleLogoutClick}>Logout</div>;
