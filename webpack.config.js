@@ -60,6 +60,9 @@ const base = {
 			index: "/",
 			disableDotRule: true,
 		},
+		headers: {
+			'X-Frame-Options': 'sameorigin'
+		}
 	},
 	output: {
 		library: "GUI",
