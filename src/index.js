@@ -22,7 +22,6 @@ import { ToastContainer } from "react-toastify";
 import Logout from "./components/logout";
 // import ReactGA from "react-ga4";
 
-
 const ScratchGUI = React.lazy(() => import("./components/scratch-gui"));
 const appTarget = document.getElementById("root");
 
@@ -58,6 +57,7 @@ if (appTarget) {
 			};
 
 			const handleMessageEvent = (ev) => {
+				console.log(ev);
 				try {
 					if (ev.origin === process.env.REACT_APP_DASHBOARD_HOST) {
 						const data = ev.data ? JSON.parse(ev.data) : null;
