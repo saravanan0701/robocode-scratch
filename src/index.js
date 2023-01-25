@@ -76,9 +76,9 @@ if (appTarget) {
 			const handleStorageEvent = (event) => {
 				if (!event) return;
 
-				if (event && event.key === "robo-en-code-token") {
+				if (event && event.key === "robo-code-token") {
 					window.location.href = "/";
-				} else if (!localStorage.getItem("robo-en-code-token") && event && event.key === "robo-en-code-token") {
+				} else if (!localStorage.getItem("robo-code-token") && event && event.key === "robo-code-token") {
 					window.location.href = "/";
 				}
 

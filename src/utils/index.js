@@ -1,1 +1,1 @@
-export const TOKEN_NAME = "robo-en-code-token";
+export const TOKEN_NAME = "robo-code-token";
