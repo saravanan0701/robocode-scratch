@@ -53,7 +53,7 @@ export default function CodeRedirect() {
 								const profileRes = await api.doFetch("GET", `${apiUrls.STUDENT_PROFILE}`);
 
 								if (profileRes.success) {
-									dispatch(setAuthData(profileRes.data));
+									dispatch(setAuthData(profileRes?.data?.responseData));
 								}
 							}
 
@@ -75,7 +75,13 @@ export default function CodeRedirect() {
 
 				getActivityData().then((activityData) => {
 					if (subscribed.current) {
-						if (activityData?.redirectId) {
+						if (
+							activityData?.redirectId 
+							|| 
+							activityData?.redirectData?.type === "new"
+							||
+							activityData?.redirectData?.studentActivity
+						) {
 							const { redirectData, classroomId } = activityData;
 
 							if (redirectData) {
@@ -88,11 +94,19 @@ export default function CodeRedirect() {
 
 								const searchString = qs.stringify(data);
 
-								// return navigate(`${classroomId}/${activityData.redirectId}?${searchString}`, { replace: true });
-								return navigate(`/${classroomId}/${activityData.redirectId}?${searchString}`, { replace: true });
+								if (type === "new") {
+									return navigate(`/new`, { replace: true });
+								} else {
+									console.log(activityData);
+									if (!activityData.redirectId) {
+										return navigate(`/${activityData?.redirectData?.studentActivity}`);
+									} else {
+										return navigate(`/${classroomId}/${activityData.redirectId}?${searchString}`, { replace: true });
+									}
+								}
 							}
 						}
-						navigate("/");
+						// navigate("/");
 					}
 				});
 

@@ -19,6 +19,8 @@ import { Capitalize } from "../../../../utils/constants";
 const AccountNavComponent = ({ className }) => {
 	const { authData } = useSelector((state) => state.main);
 
+	console.log(authData, "authData");
+
 	if (!authData) return null;
 
 	return (

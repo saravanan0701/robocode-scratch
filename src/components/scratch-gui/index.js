@@ -13,6 +13,7 @@ import AppStateHOC from "../../third-party/scratch-gui/lib/app-state-hoc.jsx";
 import HashParserHOC from "../../third-party/scratch-gui/lib/hash-parser-hoc.jsx";
 import { setActivityData } from "../../third-party/scratch-gui/reducers/new/main-reducer.js";
 import Loader from "../common/loader.jsx";
+import { checkNewProject } from "../../utils/constants.js";
 
 const WrappedGui = compose(AppStateHOC, HashParserHOC)(GUI);
 
@@ -21,7 +22,7 @@ const onClickLogo = () => {
 };
 
 export default function ScratchGUI() {
-	const { classroomId, id } = useParams();
+	const { classroomId, id, studentActivityId } = useParams();
 	const { search } = useLocation();
 	const navigate = useNavigate();
 
@@ -47,10 +48,22 @@ export default function ScratchGUI() {
 	const [loading, setLoading] = useState(false);
 	const [notfound, setNotfound] = useState(false);
 
+	const [newEmptyProject, setNewEmptyProject] = useState(false);
+
 	useEffect(() => {
-		if (!id || !search) {
+		let emptyProject = checkNewProject();
+
+		if (
+			(!id || !search) 
+			&& 
+			!emptyProject
+			&&
+			!studentActivityId
+		) {
 			navigate('/notfound')
 		}
+
+		setNewEmptyProject(emptyProject);
 
 		const getData = async () => {
 			try {
@@ -60,6 +73,10 @@ export default function ScratchGUI() {
 				const query = queryString.stringify(searchData);
 
 				let url = `${apiUrls.LOAD_ACTIVITY}/${classroomId}/${id}`;
+
+				if (studentActivityId) {
+					url = `${apiUrls.LOAD_ACTIVITY}/${studentActivityId}`;
+				}
 
 				if (query) {
 					url += "?" + query;
@@ -83,7 +100,10 @@ export default function ScratchGUI() {
 			}
 		};
 
-		getData();
+		if (!emptyProject) {
+			getData();
+		}
+		
 	}, [dispatch, navigate, id, search]);
 
 	// if (loading) return <Loader />;
@@ -99,6 +119,7 @@ export default function ScratchGUI() {
 			canEditTitle={false} 
 			canSave={false} 
 			onClickLogo={onClickLogo} 
+			newEmptyProject = {newEmptyProject}
 		/>
 	);
 }

@@ -75,6 +75,19 @@ const vmManagerHOC = function (WrappedComponent) {
 					setTimeout(() => this.props.vm.renderer.draw());
 					this.props.vm.start();
 				}
+			} else if (this.props?.newEmptyProject) {
+				if (!this.props.isStarted) {
+					const fileRes = await axios.get("https://roboencode.s3.ap-south-1.amazonaws.com/repository/documents/1674631363801_Scratch-Project-%287%29.sb3", { responseType: "arraybuffer" });
+
+					let data = fileRes.data;
+					await this.props.vm.loadProject(data);
+				}
+				this.props.onLoadedProject(this.props.loadingState, this.props.canSave);
+				setTimeout(() => this.props.onSetProjectUnchanged());
+				// Wrap in a setTimeout because skin loading in
+				// the renderer can be async.
+				setTimeout(() => this.props.vm.renderer.draw());
+				this.props.vm.start();
 			}
 		}
 		loadProject() {

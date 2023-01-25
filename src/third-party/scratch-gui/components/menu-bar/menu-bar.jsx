@@ -85,6 +85,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import { setProjectUnchanged } from "../../reducers/project-changed.js";
+import { checkNewProject } from "../../../../utils/constants.js";
 
 const ariaMessages = defineMessages({
 	language: {
@@ -176,11 +177,12 @@ class MenuBar extends React.Component {
 			"handleSaveNew",
 		]);
 		this.state = {
-			name: "",
-			defaultName: "",
+			name: "Scratch Project",
+			defaultName: "Scratch Project",
 			newName: "",
 			open: false,
-			loading: false
+			loading: false,
+			saveAsLoading: false
 		};
 	}
 
@@ -190,6 +192,7 @@ class MenuBar extends React.Component {
 
 	componentDidUpdate(prevProps, prevState) {
 		if (prevProps.activityData === null && this.props.activityData) {
+
 			const { activityData } = this.props;
 
 			const name = activityData?.studentActivity?.name || activityData?.name;
@@ -226,7 +229,11 @@ class MenuBar extends React.Component {
 
 		const { studentActivity } = this.props.activityData || {};
 
-		if (!studentActivity || !studentActivity._id) return;
+		if (!studentActivity || !studentActivity._id) {
+			if (!checkNewProject()) {
+				return;
+			}
+		};
 
 		let { name, defaultName, loading } = this.state;
 
@@ -236,7 +243,7 @@ class MenuBar extends React.Component {
 			newProject = true;
 		}
 
-		if (newProject) {
+		if (newProject && !checkNewProject()) {
 			const { isConfirmed } = await Swal.fire({
 				title: "Are you sure?",
 				text: "A new file will be created",
@@ -296,7 +303,32 @@ class MenuBar extends React.Component {
 		body.activityData =  data?.data?.files[0];
 
 		try {
-			if (!newProject) {
+
+			if (checkNewProject()) {
+				this.props.saveProjectChanges();
+				const saveActivityRes = await api.doFetch(
+					"POST",
+					`${apiUrls.SAVE_EMPTY_PROJECT}?activityType=scratch`,
+					body
+				);
+
+				if (saveActivityRes?.success) {
+					const data = saveActivityRes.data?.studentActivity;
+
+					if (!data) return;
+
+					// const urlData = { activityType: "scratch" };
+					// const searchString = qs.stringify(urlData);
+					// const url = `/${data._id}?${searchString}`;
+					const url = `/${data._id}`;
+
+					location.href = url;
+				} else {
+					toast.warning("There was a problem saving the activity");
+				}
+
+				this.setState({ loading: false });
+			} else if (!newProject) {
 				const saveActivityRes = await api.doFetch(
 					"POST",
 					`${apiUrls.SAVE_ACTIVITY}/${studentActivity._id}?activityType=scratch`,
@@ -325,7 +357,12 @@ class MenuBar extends React.Component {
 
 					const urlData = { activityType: "scratch", id: data._id };
 					const searchString = qs.stringify(urlData);
-					const url = `/${studentActivity?.classroomId}/${data.activityId}?${searchString}`;
+
+					let url = `/${studentActivity?.classroomId}/${data.activityId}?${searchString}`;
+
+					if (!data.activityId) {
+						url = `/${data._id}`;
+					}
 
 					location.href = url;
 				} else {
@@ -343,7 +380,11 @@ class MenuBar extends React.Component {
 	handleSaveNew = async () => {
 		const { studentActivity } = this.props.activityData || {};
 
-		if (!studentActivity || !studentActivity._id) return;
+		if (!studentActivity || !studentActivity._id) {
+			if (!checkNewProject()) {
+				return;
+			}
+		};
 
 		const { newName } = this.state;
 		const new_name = newName.trim();
@@ -353,27 +394,85 @@ class MenuBar extends React.Component {
 			return;
 		}
 
+		this.setState({ saveAsLoading: true });
+
 		const body = { name: new_name };
 
 		try {
-			const saveActivityRes = await api.doFetch("POST", `${apiUrls.SAVE_NEW_ACTIVITY}/${studentActivity._id}`, body);
 
-			if (saveActivityRes?.success) {
-				const data = saveActivityRes.data?.studentActivity;
+			if (checkNewProject()) {
+				let activityData = await this.props.saveProjectSb3()
+		
+				const fileName = `${this.state.name}.sb3`;
+		
+				let formdata = new FormData();
+		
+				formdata.append("files", new File([activityData], fileName, { lastModified: new Date().getTime(), type: activityData.type }));
+		
+				const data = await api.doFetch(
+					"PUT",
+					apiUrls.UPLOAD_FILE,
+					formdata,
+				);
+		
+				if (!data?.success) {
+					this.setState({
+						saveAsLoading: false
+					})
+					Swal.fire("Error!", data?.message || "Internal server Error", "error");
+				}
+				body.activityData =  data?.data?.files[0];
+				this.props.saveProjectChanges();
 
-				if (!data) {
-					return;
+				const saveActivityRes = await api.doFetch(
+					"POST",
+					`${apiUrls.SAVE_EMPTY_PROJECT}?activityType=scratch`,
+					body
+				);
+
+				if (saveActivityRes?.success) {
+					const data = saveActivityRes.data?.studentActivity;
+
+					if (!data) return;
+
+					// const urlData = { activityType: "scratch" };
+					// const searchString = qs.stringify(urlData);
+					// const url = `/${data._id}?${searchString}`;
+					const url = `/${data._id}`;
+
+					location.href = url;
+				} else {
+					toast.warning("There was a problem saving the activity");
 				}
 
-				const urlData = { activityType: "scratch", id: data._id };
+				this.setState({ saveAsLoading: false });
+			} else {
+				const saveActivityRes = await api.doFetch("POST", `${apiUrls.SAVE_NEW_ACTIVITY}/${studentActivity._id}`, body);
 
-				const searchString = qs.stringify(urlData);
+				if (saveActivityRes?.success) {
+					const data = saveActivityRes.data?.studentActivity;
 
-				const url = `/${studentActivity?.classroomId}/${data.activityId}?${searchString}`;
+					if (!data) {
+						return;
+					}
 
-				location.href = url;
+					const urlData = { activityType: "scratch", id: data._id };
+
+					const searchString = qs.stringify(urlData);
+
+					let url = `/${studentActivity?.classroomId}/${data.activityId}?${searchString}`;
+
+					if (!data.activityId) {
+						url = `/${data._id}`;
+					}
+
+					this.setState({ saveAsLoading: false });
+
+					location.href = url;
+				}
 			}
 		} catch (error) {
+			this.setState({ saveAsLoading: false });
 			toast.warning("There was a problem saving the activity");
 		}
 	};
@@ -685,7 +784,9 @@ class MenuBar extends React.Component {
 						title="Save to my projects"
 						onCancel={this.handleCancelModal}
 						open={this.state.open}
-						onOk={this.handleSaveNew}>
+						onOk={this.handleSaveNew}
+						confirmLoading={this.state.saveAsLoading}
+					>
 						<Input
 							size="large"
 							placeholder="Enter name"

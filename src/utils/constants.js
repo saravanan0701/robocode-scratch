@@ -5,3 +5,7 @@ export const Capitalize = (text) => {
 		return "";
 	}
 };
+
+export const checkNewProject = () => {
+	return window.location?.pathname === "/new" || location?.pathname === "/new/" ? true : false
+}

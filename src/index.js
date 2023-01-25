@@ -135,7 +135,7 @@ if (appTarget) {
 						const profileRes = await api.doFetch("GET", `${apiUrls.STUDENT_PROFILE}`);
 
 						if (profileRes.success) {
-							dispatch(setAuthData(profileRes.data));
+							dispatch(setAuthData(profileRes?.data?.responseData));
 						}
 					}
 				} catch (error) {
@@ -156,6 +156,8 @@ if (appTarget) {
 					<Route path="/redirect" element={<CodeRedirect />} />
 					<Route path="/notfound" element={<NotFound />} />
 					<Route path="/logout" element={<Logout />} />
+					<Route path="/new" element={<ScratchGUI />} />
+					<Route path="/:studentActivityId" element={<ScratchGUI />} />
 					<Route path="/:classroomId/:id" element={<ScratchGUI />} />
 					<Route path="*" element={<NotFound />} />
 				</Routes>
