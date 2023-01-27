@@ -135,7 +135,7 @@ if (appTarget) {
 						const profileRes = await api.doFetch("GET", `${apiUrls.STUDENT_PROFILE}`);
 
 						if (profileRes.success) {
-							dispatch(setAuthData(profileRes?.data?.responseData));
+							dispatch(setAuthData(profileRes?.data));
 						}
 					}
 				} catch (error) {

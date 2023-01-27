@@ -14,7 +14,7 @@ import styles from "./account-nav.css";
 import { useSelector } from "react-redux";
 import { Button, Dropdown } from "antd";
 import AccountNavLogout from "./new/account-nav-logout.jsx";
-import { Capitalize } from "../../../../utils/constants";
+import { CapitalizeWord, generateProfileInitials } from "../../../../utils/constants";
 
 const AccountNavComponent = ({ className }) => {
 	const { authData } = useSelector((state) => state.main);
@@ -33,6 +33,9 @@ const AccountNavComponent = ({ className }) => {
 							{
 								key: "1",
 								label: <a>Profile</a>,
+								onClick: () => {
+									window.open(process.env.REACT_APP_DASHBOARD_HOST + "/profile");
+								}
 							},
 							{
 								key: "2",
@@ -45,11 +48,41 @@ const AccountNavComponent = ({ className }) => {
 					<Button
 						className={classNames(styles.userInfo, className)}
 						type="ghost"
-						style={{ color: "#fff", fontWeight: 600, borderRadius: 0 }}>
-						<span className={styles.profileName}>Hi, {Capitalize(authData?.name)}</span>
-						<div className={styles.dropdownCaretPosition}>
-							<img className={styles.dropdownCaretIcon} src={dropdownCaret} />
+						style={{ color: "#fff", fontWeight: 600, borderRadius: 0 }}
+					>
+						<span className={styles.profileName}>
+							Hi, {CapitalizeWord(authData?.name)}
+						</span>
+						<div className="avatar_container">
+						{
+							authData?.avatar ?
+							<img
+								src={authData?.avatar}
+								alt="profile"
+								style={{
+									width: "35px",
+									height: "35px",
+									borderRadius: "0.42rem"
+								}}
+							/>
+							:
+							<span className="symbol symbol-35 symbol-light-robocode">
+								<span className="symbol-label font-size-h5 font-weight-bold">
+									<span
+										// style = {{
+										// 	fontWeight: 500,
+										// 	fontSize: "16px"
+										// }}
+									>
+										{generateProfileInitials(authData?.name)}
+									</span>
+								</span>
+							</span>
+						}
 						</div>
+						{/* <div className={styles.dropdownCaretPosition}>
+							<img className={styles.dropdownCaretIcon} src={dropdownCaret} />
+						</div> */}
 					</Button>
 				</Dropdown>
 			</div>

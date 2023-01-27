@@ -57,6 +57,44 @@
 					transform: rotate(360deg);
 				}
 			}
+			.symbol {
+				display: inline-block;
+				flex-shrink: 0;
+				position: relative;
+				border-radius: 0.42rem;
+			}
+
+			.symbol.symbol-35 .symbol-label {
+				width: 35px;
+				height: 35px;
+			}
+
+			.symbol .symbol-label {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-weight: 500;
+				line-height: 0;
+				color: #464e5f;
+				background-color: #f3f6f9;
+				background-repeat: no-repeat;
+				background-position: 50%;
+				background-size: cover;
+				border-radius: 0.42rem;
+				border-top-left-radius: 0.42rem;
+				border-top-right-radius: 0.42rem;
+				border-bottom-right-radius: 0.42rem;
+				border-bottom-left-radius: 0.42rem;
+			}
+
+			.symbol.symbol-light-robocode .symbol-label {
+				background-color: #f58634;
+				color: #FFFFFF;
+			}
+
+			.avatar_container {
+				margin-left: 0.5rem;
+			}
 		</style>
 		<link rel="stylesheet" href="/static/ReactToastify.min.css" />
 		<link rel="stylesheet" href="/static/index.css" />
