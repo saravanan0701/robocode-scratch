@@ -86,6 +86,7 @@ import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import { setProjectUnchanged } from "../../reducers/project-changed.js";
 import { checkNewProject } from "../../../../utils/constants.js";
+import swal from "sweetalert";
 
 const ariaMessages = defineMessages({
 	language: {
@@ -229,7 +230,7 @@ class MenuBar extends React.Component {
 
 		const { studentActivity } = this.props.activityData || {};
 
-		if (!studentActivity || !studentActivity._id) {
+		if (!studentActivity) {
 			if (!checkNewProject()) {
 				return;
 			}
@@ -329,43 +330,68 @@ class MenuBar extends React.Component {
 
 				this.setState({ loading: false });
 			} else if (!newProject) {
+
+				let url = `${apiUrls.SAVE_ACTIVITY}/${studentActivity._id}?activityType=scratch`;
+
+				if (!studentActivity._id) {
+					url = `${apiUrls.SAVE_ACTIVITY}/${studentActivity.classroomId}/${studentActivity.activityId}?activityType=scratch&type=${studentActivity?.type}`;
+					this.props.saveProjectChanges();
+				}
+
 				const saveActivityRes = await api.doFetch(
 					"POST",
-					`${apiUrls.SAVE_ACTIVITY}/${studentActivity._id}?activityType=scratch`,
+					url,
 					body
 				);
 
 				if (saveActivityRes?.success) {
 					toast.success("Saved successfully");
+					// swal("Success!", "Saved successfully", "success");
 
-					this.props.saveProjectChanges();
+					if (!studentActivity._id && saveActivityRes?.data?._id) {
+						location.href = `/${saveActivityRes?.data?._id}`;
+						return;
+					} else {
+						this.props.saveProjectChanges();
+					}
 				} else {
+					// swal("Error!", "There was a problem saving the activity", "warning");
 					toast.warning("There was a problem saving the activity");
 				}
 				this.setState({ loading: false });
 			} else {
 				this.props.saveProjectChanges();
+
+				let url = `${apiUrls.SAVE_NEW_ACTIVITY}/${studentActivity._id}`;
+
+				if (!studentActivity._id) {
+					url = `${apiUrls.SAVE_ACTIVITY}/${studentActivity.classroomId}/${studentActivity.activityId}?activityType=scratch&type=${studentActivity?.type}`;
+					this.props.saveProjectChanges();
+				}
+
 				const saveActivityRes = await api.doFetch(
 					"POST",
-					`${apiUrls.SAVE_NEW_ACTIVITY}/${studentActivity._id}`,
+					url,
 					body
 				);
 
 				if (saveActivityRes?.success) {
-					const data = saveActivityRes.data?.studentActivity;
+					// const data = saveActivityRes.data?.studentActivity;
 
-					if (!data) return;
+					// if (!data) return;
 
-					const urlData = { activityType: "scratch", id: data._id };
-					const searchString = qs.stringify(urlData);
+					// const urlData = { activityType: "scratch", id: data._id };
+					// const searchString = qs.stringify(urlData);
 
-					let url = `/${studentActivity?.classroomId}/${data.activityId}?${searchString}`;
+					// let url = `/${studentActivity?.classroomId}/${data.activityId}?${searchString}`;
 
-					if (!data.activityId) {
-						url = `/${data._id}`;
-					}
+					// if (!data.activityId) {
+					// 	url = `/${data._id}`;
+					// }
 
-					location.href = url;
+					// location.href = url;
+
+					location.href = `/${saveActivityRes?.data?._id}`;
 				} else {
 					toast.warning("There was a problem saving the activity");
 				}
@@ -381,7 +407,7 @@ class MenuBar extends React.Component {
 	handleSaveNew = async () => {
 		const { studentActivity } = this.props.activityData || {};
 
-		if (!studentActivity || !studentActivity._id) {
+		if (!studentActivity) {
 			if (!checkNewProject()) {
 				return;
 			}
@@ -401,30 +427,30 @@ class MenuBar extends React.Component {
 
 		try {
 
-			if (checkNewProject()) {
-				let activityData = await this.props.saveProjectSb3()
+			let activityData = await this.props.saveProjectSb3()
 		
-				const fileName = `${this.state.name}.sb3`;
-		
-				let formdata = new FormData();
-		
-				formdata.append("files", new File([activityData], fileName, { lastModified: new Date().getTime(), type: activityData.type }));
-		
-				const data = await api.doFetch(
-					"PUT",
-					apiUrls.UPLOAD_FILE,
-					formdata,
-				);
-		
-				if (!data?.success) {
-					this.setState({
-						saveAsLoading: false
-					})
-					Swal.fire("Error!", data?.message || "Internal server Error", "error");
-				}
-				body.activityData =  data?.data?.files[0];
-				this.props.saveProjectChanges();
+			const fileName = `${this.state.name}.sb3`;
+	
+			let formdata = new FormData();
+	
+			formdata.append("files", new File([activityData], fileName, { lastModified: new Date().getTime(), type: activityData.type }));
+	
+			const data = await api.doFetch(
+				"PUT",
+				apiUrls.UPLOAD_FILE,
+				formdata,
+			);
+	
+			if (!data?.success) {
+				this.setState({
+					saveAsLoading: false
+				})
+				Swal.fire("Error!", data?.message || "Internal server Error", "error");
+			}
+			body.activityData =  data?.data?.files[0];
+			this.props.saveProjectChanges();
 
+			if (checkNewProject()) {
 				const saveActivityRes = await api.doFetch(
 					"POST",
 					`${apiUrls.SAVE_EMPTY_PROJECT}?activityType=scratch`,
@@ -448,28 +474,37 @@ class MenuBar extends React.Component {
 
 				this.setState({ saveAsLoading: false });
 			} else {
-				const saveActivityRes = await api.doFetch("POST", `${apiUrls.SAVE_NEW_ACTIVITY}/${studentActivity._id}`, body);
+
+				let url = `${apiUrls.SAVE_NEW_ACTIVITY}/${studentActivity._id}`;
+
+				if (!studentActivity._id) {
+					url = `${apiUrls.SAVE_ACTIVITY}/${studentActivity.classroomId}/${studentActivity.activityId}?activityType=scratch&type=${studentActivity?.type}`;
+					this.props.saveProjectChanges();
+				}
+
+				const saveActivityRes = await api.doFetch("POST", url, body);
 
 				if (saveActivityRes?.success) {
-					const data = saveActivityRes.data?.studentActivity;
+					// const data = saveActivityRes.data?.studentActivity;
 
-					if (!data) {
-						return;
-					}
+					// if (!data) {
+					// 	return;
+					// }
 
-					const urlData = { activityType: "scratch", id: data._id };
+					// const urlData = { activityType: "scratch", id: data._id };
 
-					const searchString = qs.stringify(urlData);
+					// const searchString = qs.stringify(urlData);
 
-					let url = `/${studentActivity?.classroomId}/${data.activityId}?${searchString}`;
+					// let url = `/${studentActivity?.classroomId}/${data.activityId}?${searchString}`;
 
-					if (!data.activityId) {
-						url = `/${data._id}`;
-					}
+					// if (!data.activityId) {
+					// 	url = `/${data._id}`;
+					// }
 
-					this.setState({ saveAsLoading: false });
+					// this.setState({ saveAsLoading: false });
 
-					location.href = url;
+					// location.href = url;
+					location.href = `/${saveActivityRes?.data?._id}`;
 				}
 			}
 		} catch (error) {
@@ -1149,119 +1184,119 @@ const mapDispatchToProps = (dispatch) => ({
 
 export default compose(injectIntl, MenuBarHOC, connect(mapStateToProps, mapDispatchToProps))(MenuBar);
 
-function SaveInput({ handleSave }) {
-	const { activityData } = useSelector((state) => state.main);
-	const { vm } = useSelector((state) => state.scratchGui);
+// function SaveInput({ handleSave }) {
+// 	const { activityData } = useSelector((state) => state.main);
+// 	const { vm } = useSelector((state) => state.scratchGui);
 
-	const [name, setName] = useState("");
-	const [newName, setNewName] = useState("");
-	const [open, setOpen] = useState(false);
+// 	const [name, setName] = useState("");
+// 	const [newName, setNewName] = useState("");
+// 	const [open, setOpen] = useState(false);
 
-	const handleChangeName = (e) => {
-		const value = e.target.value;
+// 	const handleChangeName = (e) => {
+// 		const value = e.target.value;
 
-		setName(value);
-	};
+// 		setName(value);
+// 	};
 
-	const handleChangeNewName = (e) => {
-		const value = e.target.value;
+// 	const handleChangeNewName = (e) => {
+// 		const value = e.target.value;
 
-		setNewName(value);
-	};
+// 		setNewName(value);
+// 	};
 
-	const handleCancelModal = () => {
-		setOpen(false);
+// 	const handleCancelModal = () => {
+// 		setOpen(false);
 
-		setNewName("");
-	};
+// 		setNewName("");
+// 	};
 
-	// const handleSave = async () => {
-	// 	const { studentActivity } = activityData || {};
+// 	// const handleSave = async () => {
+// 	// 	const { studentActivity } = activityData || {};
 
-	// 	if (!studentActivity || !studentActivity._id) return;
+// 	// 	if (!studentActivity || !studentActivity._id) return;
 
-	// 	const body = {
-	// 		name,
-	// 	};
+// 	// 	const body = {
+// 	// 		name,
+// 	// 	};
 
-	// 	try {
-	// 		body.activityData = vm.toJSON();
-	// 	} catch (error) {}
+// 	// 	try {
+// 	// 		body.activityData = vm.toJSON();
+// 	// 	} catch (error) {}
 
-	// 	try {
-	// 		const saveActivityRes = await api.doFetch(
-	// 			"POST",
-	// 			`${apiUrls.SAVE_ACTIVITY}/${studentActivity._id}?activityType=scratch`,
-	// 			body
-	// 		);
+// 	// 	try {
+// 	// 		const saveActivityRes = await api.doFetch(
+// 	// 			"POST",
+// 	// 			`${apiUrls.SAVE_ACTIVITY}/${studentActivity._id}?activityType=scratch`,
+// 	// 			body
+// 	// 		);
 
-	// 		if (saveActivityRes?.success) {
-	// 			const data = saveActivityRes.data;
+// 	// 		if (saveActivityRes?.success) {
+// 	// 			const data = saveActivityRes.data;
 
-	// 			console.log({ data });
-	// 		}
-	// 	} catch (error) {}
-	// };
+// 	// 			console.log({ data });
+// 	// 		}
+// 	// 	} catch (error) {}
+// 	// };
 
-	const handleSaveNew = async () => {
-		const { studentActivity } = activityData || {};
+// 	const handleSaveNew = async () => {
+// 		const { studentActivity } = activityData || {};
 
-		if (!studentActivity || !studentActivity._id) return;
-		const new_name = newName.trim();
+// 		if (!studentActivity || !studentActivity._id) return;
+// 		const new_name = newName.trim();
 
-		if (new_name.length < 3) {
-			// console.log('validation error')
-			return;
-		}
+// 		if (new_name.length < 3) {
+// 			// console.log('validation error')
+// 			return;
+// 		}
 
-		const body = { name: newName };
+// 		const body = { name: newName };
 
-		try {
-			const saveActivityRes = await api.doFetch("POST", `${apiUrls.SAVE_NEW_ACTIVITY}/${studentActivity._id}`, body);
+// 		try {
+// 			const saveActivityRes = await api.doFetch("POST", `${apiUrls.SAVE_NEW_ACTIVITY}/${studentActivity._id}`, body);
 
-			if (saveActivityRes?.success) {
-				const data = saveActivityRes.data?.studentActivity;
+// 			if (saveActivityRes?.success) {
+// 				const data = saveActivityRes.data?.studentActivity;
 
-				if (!data) {
-					// error
-					return;
-				}
+// 				if (!data) {
+// 					// error
+// 					return;
+// 				}
 
-				const urlData = { activityType: "scratch", id: data._id };
+// 				const urlData = { activityType: "scratch", id: data._id };
 
-				const searchString = qs.stringify(urlData);
+// 				const searchString = qs.stringify(urlData);
 
-				const url = `/${studentActivity?.classroomId}/${data.activityId}?${searchString}`;
+// 				const url = `/${studentActivity?.classroomId}/${data.activityId}?${searchString}`;
 
-				location.href = url;
-			}
-		} catch (error) {}
-	};
+// 				location.href = url;
+// 			}
+// 		} catch (error) {}
+// 	};
 
-	useEffect(() => {
-		if (activityData?.studentActivity) {
-			setName(activityData?.studentActivity?.name || activityData?.name);
-		}
-	}, [activityData]);
+// 	useEffect(() => {
+// 		if (activityData?.studentActivity) {
+// 			setName(activityData?.studentActivity?.name || activityData?.name);
+// 		}
+// 	}, [activityData]);
 
-	if (!activityData) return null;
+// 	if (!activityData) return null;
 
-	return (
-		<>
-			<Modal title="Save to my projects" onCancel={handleCancelModal} open={open} onOk={handleSaveNew}>
-				<Input size="large" placeholder="Enter name" value={newName} onChange={handleChangeNewName} />
-			</Modal>
+// 	return (
+// 		<>
+// 			<Modal title="Save to my projects" onCancel={handleCancelModal} open={open} onOk={handleSaveNew}>
+// 				<Input size="large" placeholder="Enter name" value={newName} onChange={handleChangeNewName} />
+// 			</Modal>
 
-			<Space style={{ width: "auto", display: "flex" }}>
-				<Input
-					className={classNames(projectTitleInputStyles.titleField, styles.titleFieldGrowable)}
-					style={{ width: "calc(200px)" }}
-					value={name}
-					onChange={handleChangeName}
-				/>
+// 			<Space style={{ width: "auto", display: "flex" }}>
+// 				<Input
+// 					className={classNames(projectTitleInputStyles.titleField, styles.titleFieldGrowable)}
+// 					style={{ width: "calc(200px)" }}
+// 					value={name}
+// 					onChange={handleChangeName}
+// 				/>
 
-				<AntButton onClick={handleSave}>Save</AntButton>
-			</Space>
-		</>
-	);
-}
+// 				<AntButton onClick={handleSave}>Save</AntButton>
+// 			</Space>
+// 		</>
+// 	);
+// }

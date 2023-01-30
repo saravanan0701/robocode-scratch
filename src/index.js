@@ -56,22 +56,22 @@ if (appTarget) {
 				}
 			};
 
-			const handleMessageEvent = (ev) => {
-				console.log(ev);
-				try {
-					if (ev.origin === process.env.REACT_APP_DASHBOARD_HOST) {
-						const data = ev.data ? JSON.parse(ev.data) : null;
+			// const handleMessageEvent = (ev) => {
+			// 	console.log(ev);
+			// 	try {
+			// 		if (ev.origin === process.env.REACT_APP_DASHBOARD_HOST) {
+			// 			const data = ev.data ? JSON.parse(ev.data) : null;
 
-						if (data) {
-							if (data.eventName === "SCRATCH_LOGOUT") {
-								localStorage.removeItem(TOKEN_NAME);
+			// 			if (data) {
+			// 				if (data.eventName === "SCRATCH_LOGOUT") {
+			// 					localStorage.removeItem(TOKEN_NAME);
 
-								window.close();
-							}
-						}
-					}
-				} catch (error) {}
-			};
+			// 					window.close();
+			// 				}
+			// 			}
+			// 		}
+			// 	} catch (error) {}
+			// };
 
 			const handleStorageEvent = (event) => {
 				if (!event) return;
@@ -99,10 +99,10 @@ if (appTarget) {
 
 			window.onstorage = handleStorageEvent;
 
-			window.addEventListener("message", handleMessageEvent);
+			// window.addEventListener("message", handleMessageEvent);
 
 			return () => {
-				window.removeEventListener("message", handleMessageEvent);
+				// window.removeEventListener("message", handleMessageEvent);
 				window.onstorage = null;
 			};
 		}, []);

@@ -100,7 +100,9 @@ export default function CodeRedirect() {
 									console.log(activityData);
 									if (!activityData.redirectId) {
 										return navigate(`/${activityData?.redirectData?.studentActivity}`);
-									} else {
+									} else if (activityData?.redirectData?.studentActivity) {
+										return navigate(`/${activityData?.redirectData?.studentActivity}`);
+									}else {
 										return navigate(`/${classroomId}/${activityData.redirectId}?${searchString}`, { replace: true });
 									}
 								}
