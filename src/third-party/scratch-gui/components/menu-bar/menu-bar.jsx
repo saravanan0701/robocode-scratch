@@ -344,6 +344,7 @@ class MenuBar extends React.Component {
 				}
 				this.setState({ loading: false });
 			} else {
+				this.props.saveProjectChanges();
 				const saveActivityRes = await api.doFetch(
 					"POST",
 					`${apiUrls.SAVE_NEW_ACTIVITY}/${studentActivity._id}`,
