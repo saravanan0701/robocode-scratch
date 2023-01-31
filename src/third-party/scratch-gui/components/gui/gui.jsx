@@ -164,6 +164,15 @@ const GUIComponent = (props) => {
 	useEffect(() => {
 		if (activityData?.documents && activityData?.documents.length > 0 && !isModalOpen) {
 			setIsModalOpen(true);
+		} else if (activityData?.documents && activityData?.documents.length === 0) {
+			let element = document.getElementsByClassName('blocklyToolboxDiv');
+
+			if (element && element.length > 0) {
+				element = element[0]
+				console.log(element.classList, element.className);
+				element.className += " no_document"
+				// element.classList.add("my-class");
+			}
 		}
 	}, [activityData])
 
@@ -309,18 +318,21 @@ const GUIComponent = (props) => {
 												/>
 											)}
 
-											<Box className={styles.viewerButtonContainer}>
-												<button
-													className={styles.extensionButton}
-													title={intl.formatMessage(messages.addExtension)}
-													onClick={() => setIsModalOpen(true)}>
-													<img
-														className={styles.extensionButtonIcon}
-														draggable={false}
-														src={documentIcon}
-													/>
-												</button>
-											</Box>
+											{
+												activityData?.documents && activityData?.documents.length > 0 &&
+												<Box className={styles.viewerButtonContainer}>
+													<button
+														className={styles.extensionButton}
+														title={intl.formatMessage(messages.addExtension)}
+														onClick={() => setIsModalOpen(true)}>
+														<img
+															className={styles.extensionButtonIcon}
+															draggable={false}
+															src={documentIcon}
+														/>
+													</button>
+												</Box>
+											}
 											<Box className={styles.extensionButtonContainer}>
 												<button
 													className={styles.extensionButton}
