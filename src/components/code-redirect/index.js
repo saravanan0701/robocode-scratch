@@ -47,13 +47,15 @@ export default function CodeRedirect() {
 
 							localStorage.setItem(TOKEN_NAME, data.accessToken);
 
-							const authData = store.getState()?.main?.authData;
+							let authData = store.getState()?.main?.authData;
+
+							authData = null;
 
 							if (!authData) {
 								const profileRes = await api.doFetch("GET", `${apiUrls.STUDENT_PROFILE}`);
 
 								if (profileRes.success) {
-									dispatch(setAuthData(profileRes?.data?.responseData));
+									dispatch(setAuthData(profileRes?.data));
 								}
 							}
 
