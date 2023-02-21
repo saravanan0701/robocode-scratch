@@ -5,6 +5,7 @@ import {connect} from 'react-redux';
 import ReactModal from 'react-modal';
 import VM from 'scratch-vm';
 import {injectIntl, intlShape} from 'react-intl';
+import queryString from "query-string";
 
 import ErrorBoundaryHOC from '../lib/error-boundary-hoc.jsx';
 import {
@@ -41,14 +42,28 @@ import GUIComponent from '../components/gui/gui.jsx';
 import {setIsScratchDesktop} from '../lib/isScratchDesktop.js';
 import Loader from '../../../components/common/loader.jsx';
 import NotFound from '../../../components/notFound/index.js';
+import { setFullScreen } from '../reducers/mode.js';
 
 class GUI extends React.Component {
     componentDidMount () {
+        // const searchData = queryString.parse(this.props.search);
+
+        // if (searchData.preview) {
+        //     this.props.onSetStageFull();
+        // }
+
         setIsScratchDesktop(this.props.isScratchDesktop);
         this.props.onStorageInit(storage);
         this.props.onVmInit(this.props.vm);
     }
     componentDidUpdate (prevProps) {
+        if (!this.props.isLoading && prevProps.isLoading) {
+            const searchData = queryString.parse(this.props.search);
+
+            if (searchData.preview) {
+                this.props.onSetStageFull();
+            }
+        }
         if (this.props.projectId !== prevProps.projectId && this.props.projectId !== null) {
             this.props.onUpdateProjectId(this.props.projectId);
         }
@@ -168,7 +183,9 @@ const mapDispatchToProps = dispatch => ({
     onActivateSoundsTab: () => dispatch(activateTab(SOUNDS_TAB_INDEX)),
     onRequestCloseBackdropLibrary: () => dispatch(closeBackdropLibrary()),
     onRequestCloseCostumeLibrary: () => dispatch(closeCostumeLibrary()),
-    onRequestCloseTelemetryModal: () => dispatch(closeTelemetryModal())
+    onRequestCloseTelemetryModal: () => dispatch(closeTelemetryModal()),
+    onSetStageFull: () => dispatch(setFullScreen(true)),
+    
 });
 
 const ConnectedGUI = injectIntl(connect(

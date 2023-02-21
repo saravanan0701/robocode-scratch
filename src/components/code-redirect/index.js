@@ -87,9 +87,13 @@ export default function CodeRedirect() {
 							const { redirectData, classroomId } = activityData;
 
 							if (redirectData) {
-								const { type, activity_type: activityType, id } = redirectData;
+								const { type, activity_type: activityType, id, preview } = redirectData;
 
 								const data = { type };
+
+								if (preview) {
+									data.preview = preview;
+								}
 
 								if (id) data.id = id;
 								if (activityType) data.activityType = activityType;

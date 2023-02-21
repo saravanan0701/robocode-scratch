@@ -120,6 +120,7 @@ export default function ScratchGUI() {
 			canSave={false} 
 			onClickLogo={onClickLogo} 
 			newEmptyProject = {newEmptyProject}
+			search = {search}
 		/>
 	);
 }

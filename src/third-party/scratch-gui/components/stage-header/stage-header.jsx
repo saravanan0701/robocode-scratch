@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import {connect} from 'react-redux';
 import VM from 'scratch-vm';
+import queryString from "query-string";
 
 import Box from '../box/box.jsx';
 import Button from '../button/button.jsx';
@@ -65,6 +66,14 @@ const StageHeaderComponent = function (props) {
 
     if (isFullScreen) {
         const stageDimensions = getStageDimensions(null, true);
+
+        let showExitFullScreenButton = true;
+        const searchData = queryString.parse(window.location.search);
+
+        if (searchData.preview) {
+            showExitFullScreenButton = false; 
+        }
+
         const stageButton = showBranding ? (
             <div className={styles.embedScratchLogo}>
                 <a
@@ -78,7 +87,7 @@ const StageHeaderComponent = function (props) {
                     />
                 </a>
             </div>
-        ) : (
+        ) : showExitFullScreenButton ?(
             <Button
                 className={styles.stageButton}
                 onClick={onSetStageUnFull}
@@ -92,7 +101,7 @@ const StageHeaderComponent = function (props) {
                     title={props.intl.formatMessage(messages.fullscreenControl)}
                 />
             </Button>
-        );
+        ) : null;
         header = (
             <Box className={styles.stageHeaderWrapperOverlay}>
                 <Box
