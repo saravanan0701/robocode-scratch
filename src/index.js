@@ -110,11 +110,14 @@ if (appTarget) {
 
 		return (
 			<React.Fragment>
-				<Suspense fallback={<Loader />}>
+				{/* <Suspense fallback={<Loader />}>
 					<Provider store={store}>
 						<InnerApp />
 					</Provider>
-				</Suspense>
+				</Suspense> */}
+				<Provider store={store}>
+					<InnerApp />
+				</Provider>
 
 				<ToastContainer autoClose={3000} position="top-center" theme="colored" />
 			</React.Fragment>
