@@ -22,7 +22,8 @@ import { ToastContainer } from "react-toastify";
 import Logout from "./components/logout";
 // import ReactGA from "react-ga4";
 
-const ScratchGUI = React.lazy(() => import("./components/scratch-gui"));
+// const ScratchGUI = React.lazy(() => import("./components/scratch-gui"));
+import ScratchGUI from "./components/scratch-gui";
 const appTarget = document.getElementById("root");
 
 if (appTarget) {
