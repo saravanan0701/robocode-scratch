@@ -348,7 +348,8 @@
     align-items: center; */
     position: relative;
     text-align: center;
-    overflow: scroll;
+    /* overflow: scroll; */
+    overflow: hidden;
 
     max-height: 350px;
     min-height: 350px;
