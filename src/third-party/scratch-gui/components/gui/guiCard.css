@@ -319,7 +319,9 @@
     position:absolute;
     pointer-events: auto;
     z-index: $z-index-card;
-    min-width: 560px;
+    /* min-width: 560px; */
+    min-width: 625px;
+
 }
 
 .card {
@@ -353,5 +355,6 @@
 
     max-height: 350px;
     min-height: 350px;
-    max-width: 560px;
+    /* max-width: 560px; */
+    max-width: 625px;
 }
