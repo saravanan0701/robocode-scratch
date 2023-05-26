@@ -14,6 +14,7 @@ import HashParserHOC from "../../third-party/scratch-gui/lib/hash-parser-hoc.jsx
 import { setActivityData } from "../../third-party/scratch-gui/reducers/new/main-reducer.js";
 import Loader from "../common/loader.jsx";
 import { checkNewProject } from "../../utils/constants.js";
+import { TOKEN_NAME } from "../../utils/index.js";
 
 const WrappedGui = compose(AppStateHOC, HashParserHOC)(GUI);
 
@@ -61,6 +62,10 @@ export default function ScratchGUI() {
 			!studentActivityId
 		) {
 			navigate('/notfound')
+		}
+
+		if(!localStorage.getItem(TOKEN_NAME)) {
+			window.location.href = `${process.env.REACT_APP_DASHBOARD_HOST}/auth/student/login`;
 		}
 
 		setNewEmptyProject(emptyProject);
